@@ -50,7 +50,7 @@ export const Home = () => {
     ];
 
     return (
-        <div 
+        <div
             className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 dark:from-gray-900 dark:to-gray-800 p-4 relative"
             style={{
                 backgroundImage: 'url(/home-bg.webp)',
@@ -60,19 +60,19 @@ export const Home = () => {
             }}
         >
             {/* Overlay for better readability */}
-            <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/90 backdrop-blur-sm"></div>
-            
+            <div className="absolute inset-0 bg-white/70 dark:bg-gray-900/90 backdrop-blur-sm"></div>
+
             <div className="max-w-4xl w-full relative z-10">
                 <div className="text-center mb-12">
                     {/* Logo */}
                     <div className="flex justify-center mb-6">
-                        <img 
-                            src="/logo.png" 
-                            alt="شعار غراس" 
+                        <img
+                            src="/logo.png"
+                            alt="شعار غراس"
                             className="h-24 w-24 md:h-32 md:w-32 object-contain drop-shadow-lg"
                         />
                     </div>
-                    
+
                     <h1 className="text-4xl md:text-5xl font-black mb-4 text-primary drop-shadow-md">
                         غراس مدير المهام
                     </h1>

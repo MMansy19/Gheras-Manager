@@ -53,29 +53,32 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                         const rect = container.getBoundingClientRect();
                         // Smaller threshold for mobile, larger for desktop
                         const isMobile = window.innerWidth < 768;
-                        const threshold = isMobile ? 100 : 150;
-                        const maxScrollSpeed = isMobile ? 25 : 20;
-                        const acceleration = isMobile ? 2.5 : 2;
+                        const threshold = isMobile ? 120 : 150;
+                        const maxScrollSpeed = isMobile ? 30 : 25;
 
                         const currentX = mousePositionRef.current.x;
 
-                        // Calculate scroll speed based on distance from edge
-                        let scrollSpeed = 0;
+                        // Calculate horizontal scroll speed based on distance from edge
+                        let scrollSpeedX = 0;
 
                         if (currentX > 0 && currentX < rect.left + threshold) {
-                            // Near left edge - scroll left (RTL: scroll to right content)
+                            // Near left edge - scroll left (RTL: scroll to show more columns on the right)
                             const distance = (rect.left + threshold) - currentX;
                             const normalizedDistance = Math.min(1, distance / threshold);
-                            scrollSpeed = -Math.min(maxScrollSpeed, normalizedDistance * maxScrollSpeed * acceleration);
+                            scrollSpeedX = -maxScrollSpeed * normalizedDistance;
                         } else if (currentX > rect.right - threshold && currentX < window.innerWidth) {
-                            // Near right edge - scroll right (RTL: scroll to left content)
+                            // Near right edge - scroll right (RTL: scroll to show more columns on the left)
                             const distance = currentX - (rect.right - threshold);
                             const normalizedDistance = Math.min(1, distance / threshold);
-                            scrollSpeed = Math.min(maxScrollSpeed, normalizedDistance * maxScrollSpeed * acceleration);
+                            scrollSpeedX = maxScrollSpeed * normalizedDistance;
                         }
 
-                        if (scrollSpeed !== 0) {
-                            container.scrollLeft += scrollSpeed;
+                        // Apply horizontal scroll
+                        if (scrollSpeedX !== 0) {
+                            container.scrollBy({
+                                left: scrollSpeedX,
+                                behavior: 'auto'
+                            });
                         }
                     }
 
@@ -95,7 +98,6 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                     WebkitOverflowScrolling: 'touch',
                     scrollbarWidth: 'thin',
                     overscrollBehaviorX: 'contain',
-                    touchAction: 'pan-x pan-y'
                 }}
                 onMouseMove={(e) => {
                     mousePositionRef.current = { x: e.clientX, y: e.clientY };

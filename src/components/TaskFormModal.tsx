@@ -6,7 +6,7 @@ import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { DatePicker } from './ui/date-picker';
 import { Button } from './ui/button';
-import { Task, TaskPriority, PRIORITY_LABELS } from '../types';
+import { Task, TaskPriority, TaskStatus, PRIORITY_LABELS, STATUS_LABELS } from '../types';
 
 interface TaskFormModalProps {
     isOpen: boolean;
@@ -36,6 +36,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     const [formData, setFormData] = useState({
         title: '',
         description: '',
+        status: 'new' as TaskStatus,
         priority: 'normal' as TaskPriority,
         due_date: '',
         assignee_id: '' as string | number,
@@ -48,6 +49,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             setFormData({
                 title: task.title || '',
                 description: task.description || '',
+                status: task.status || 'new',
                 priority: task.priority || 'normal',
                 due_date: task.due_date || '',
                 assignee_id: task.assignee_id || 'unassigned',
@@ -58,6 +60,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
             setFormData({
                 title: '',
                 description: '',
+                status: 'new',
                 priority: 'normal',
                 due_date: '',
                 assignee_id: role === 'volunteer' && currentUserId ? currentUserId : 'unassigned',
@@ -108,6 +111,25 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
 
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
+                        <Label htmlFor="status">حالة المهمة</Label>
+                        <Select
+                            value={formData.status}
+                            onValueChange={(value) => setFormData({ ...formData, status: value as TaskStatus })}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="اختر الحالة" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                                    <SelectItem key={value} value={value}>
+                                        {label}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="space-y-2">
                         <Label htmlFor="priority">درجة الأهمية</Label>
                         <Select
                             value={formData.priority}
@@ -125,15 +147,15 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                             </SelectContent>
                         </Select>
                     </div>
+                </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="due_date">تاريخ التسليم</Label>
-                        <DatePicker
-                            value={formData.due_date || ''}
-                            onChange={(date) => setFormData({ ...formData, due_date: date })}
-                            placeholder="اختر تاريخ التسليم"
-                        />
-                    </div>
+                <div className="space-y-2">
+                    <Label htmlFor="due_date">تاريخ التسليم</Label>
+                    <DatePicker
+                        value={formData.due_date || ''}
+                        onChange={(date) => setFormData({ ...formData, due_date: date })}
+                        placeholder="اختر تاريخ التسليم"
+                    />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
