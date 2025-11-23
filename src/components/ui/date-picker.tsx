@@ -23,18 +23,29 @@ export function DatePicker({ value, onChange, placeholder = "اختر التار
     const [date, setDate] = React.useState<Date | undefined>(
         value ? new Date(value) : undefined
     )
+    const [open, setOpen] = React.useState(false)
+
+    // Sync with incoming value prop
+    React.useEffect(() => {
+        if (value) {
+            setDate(new Date(value))
+        } else {
+            setDate(undefined)
+        }
+    }, [value])
 
     const handleSelect = (selectedDate: Date | undefined) => {
         setDate(selectedDate)
         if (selectedDate) {
             onChange(format(selectedDate, "yyyy-MM-dd"))
+            setOpen(false) // Close the popover after selection
         } else {
             onChange("")
         }
     }
 
     return (
-        <Popover>
+        <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <Button
                     variant={"outline"}

@@ -14,6 +14,45 @@
     direction: rtl;
   }
 
+  /* Global scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(148, 163, 184, 0.5) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: rgba(148, 163, 184, 0.05);
+    border-radius: 10px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(148, 163, 184, 0.6), rgba(148, 163, 184, 0.4));
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(100, 116, 139, 0.8), rgba(100, 116, 139, 0.6));
+  }
+
+  .dark *::-webkit-scrollbar-track {
+    background: rgba(71, 85, 105, 0.1);
+  }
+
+  .dark *::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(71, 85, 105, 0.7), rgba(71, 85, 105, 0.5));
+  }
+
+  .dark *::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(100, 116, 139, 0.9), rgba(100, 116, 139, 0.7));
+  }
+
   * {
     box-sizing: border-box;
   }
@@ -201,29 +240,84 @@
   /* Scrollbar Styles */
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: rgb(203 213 225) transparent;
+    scrollbar-color: rgba(148, 163, 184, 0.5) transparent;
   }
 
   .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-track {
     background: transparent;
+    border-radius: 10px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: rgb(203 213 225);
-    border-radius: 3px;
+    background: linear-gradient(180deg, rgba(148, 163, 184, 0.6), rgba(148, 163, 184, 0.4));
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: all 0.3s ease;
   }
 
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(100, 116, 139, 0.8), rgba(100, 116, 139, 0.6));
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  /* Dark mode scrollbar */
   .dark .scrollbar-thin {
-    scrollbar-color: rgb(71 85 105) transparent;
+    scrollbar-color: rgba(71, 85, 105, 0.6) transparent;
   }
 
   .dark .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: rgb(71 85 105);
+    background: linear-gradient(180deg, rgba(71, 85, 105, 0.7), rgba(71, 85, 105, 0.5));
+  }
+
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(100, 116, 139, 0.9), rgba(100, 116, 139, 0.7));
+  }
+
+  /* Custom styled scrollbar */
+  .scrollbar-custom {
+    scrollbar-width: auto;
+    scrollbar-color: #10b981 rgba(16, 185, 129, 0.1);
+  }
+
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-track {
+    background: rgba(16, 185, 129, 0.05);
+    border-radius: 10px;
+    margin: 2px;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #10b981, #059669);
+    border-radius: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #059669, #047857);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  }
+
+  .dark .scrollbar-custom::-webkit-scrollbar-track {
+    background: rgba(16, 185, 129, 0.1);
+  }
+
+  .dark .scrollbar-custom::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #059669, #047857);
+    border-color: rgba(255, 255, 255, 0.1);
   }
 }
 
@@ -297,4 +391,39 @@
 [data-sonner-toast] {
   direction: rtl !important;
   text-align: right !important;
+}
+
+/* Kanban Board Mobile Optimizations */
+.kanban-container {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+}
+
+.kanban-container > div > div {
+  scroll-snap-align: start;
+}
+
+/* Mobile touch improvements */
+@media (max-width: 640px) {
+  .kanban-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  .kanban-container::-webkit-scrollbar {
+    height: 4px;
+  }
+}
+
+/* Dragging state improvements */
+.card.cursor-grab {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.card.active\:cursor-grabbing:active {
+  cursor: grabbing !important;
 }

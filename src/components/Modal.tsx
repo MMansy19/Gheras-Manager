@@ -25,16 +25,9 @@ export const Modal: React.FC<ModalProps> = ({
         xl: 'max-w-6xl',
     };
 
-    const handleBackdropClick = (e: React.MouseEvent) => {
-        if (e.target === e.currentTarget) {
-            onClose();
-        }
-    };
-
     return ReactDOM.createPortal(
         <div
             className="modal-overlay animate-fade-in"
-            onClick={handleBackdropClick}
             role="dialog"
             aria-modal="true"
             aria-labelledby="modal-title"

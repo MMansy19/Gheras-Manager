@@ -2,15 +2,16 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { fetchUsers, createUser, updateUser, fetchTeams } from '../api/mockApi';
+import { fetchUsers, createUser, updateUser, deleteUser, fetchTeams } from '../api/mockApi';
 import { User, ROLE_LABELS } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { EmptyState } from '../components/EmptyState';
 import { Modal } from '../components/Modal';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useRole } from '../hooks/useRole';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { AlertTriangle, Plus, Edit2, Search, Users } from 'lucide-react';
+import { AlertTriangle, Plus, Edit2, Search, Users, Trash2 } from 'lucide-react';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
@@ -23,6 +24,7 @@ export const UsersManagement = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
+    const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
     useEffect(() => {
         if (role !== 'admin' && role !== 'supervisor') {
@@ -62,6 +64,17 @@ export const UsersManagement = () => {
         },
         onError: () => {
             toast.error('فشل تحديث المستخدم');
+        },
+    });
+
+    const deleteUserMutation = useMutation({
+        mutationFn: deleteUser,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['users'] });
+            toast.success('تم حذف المستخدم بنجاح');
+        },
+        onError: () => {
+            toast.error('فشل حذف المستخدم');
         },
     });
 
@@ -146,6 +159,13 @@ export const UsersManagement = () => {
                                     <td>
                                         <div className="flex gap-2 justify-end">
                                             <button
+                                                onClick={() => setUserToDelete(user)}
+                                                className="text-sm bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 py-1 px-2 rounded-md flex items-center gap-1 transition-colors"
+                                            >
+                                                <Trash2 className="w-3 h-3" />
+                                                حذف
+                                            </button>
+                                            <button
                                                 onClick={() => setEditingUser(user)}
                                                 className="text-sm btn-secondary py-1 px-2 flex items-center gap-1"
                                             >
@@ -214,6 +234,21 @@ export const UsersManagement = () => {
                         createUserMutation.mutate(data);
                     }
                 }}
+            />
+
+            {/* Delete Confirmation Dialog */}
+            <ConfirmDialog
+                isOpen={!!userToDelete}
+                onClose={() => setUserToDelete(null)}
+                onConfirm={() => {
+                    if (userToDelete) {
+                        deleteUserMutation.mutate(userToDelete.id);
+                    }
+                }}
+                title="تأكيد حذف المستخدم"
+                message={`هل أنت متأكد من حذف المستخدم "${userToDelete?.name}"؟ لا يمكن التراجع عن هذا الإجراء.`}
+                confirmText="حذف"
+                cancelText="إلغاء"
             />
         </div>
     );

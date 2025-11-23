@@ -465,6 +465,13 @@ export const updateUser = async (id: number, input: Partial<User>): Promise<User
   return UserSchema.parse(MOCK_USERS[index]);
 };
 
+export const deleteUser = async (id: number): Promise<void> => {
+  await delay();
+  const index = MOCK_USERS.findIndex(u => u.id === id);
+  if (index === -1) throw new Error('المستخدم غير موجود');
+  MOCK_USERS.splice(index, 1);
+};
+
 // API Functions - Tasks
 export const fetchTasks = async (teamId?: number): Promise<Task[]> => {
   await delay();
