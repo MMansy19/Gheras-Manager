@@ -36,5 +36,5 @@ build
 docs
 .vscode
 .env.*
-
+library
 

@@ -165,15 +165,14 @@ export const TeamDashboard = () => {
             {/* Header */}
             <div className="mb-6 flex flex-col sm:flex-row-reverse items-start sm:items-center justify-between gap-4">
                 <div>
-                    {isAdminOrSupervisor && (
-                        <button
-                            onClick={() => setIsCreateModalOpen(true)}
-                            className="btn-primary flex items-center gap-2"
-                        >
-                            <Plus className="w-5 h-5" />
-                            إضافة مهمة جديدة
-                        </button>
-                    )}
+                    {/* All roles can create tasks, but volunteers can only assign to themselves */}
+                    <button
+                        onClick={() => setIsCreateModalOpen(true)}
+                        className="btn-primary flex items-center gap-2"
+                    >
+                        <Plus className="w-5 h-5" />
+                        إضافة مهمة جديدة
+                    </button>
                 </div>
                 <div>
                     <h1 className="text-3xl font-bold mb-1">{currentTeam?.name}</h1>
