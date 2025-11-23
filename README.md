@@ -314,211 +314,81 @@ pnpm run test -- --watch
 
 ---
 
-## 📚 التوثيق
+## 📚 Documentation
 
-- 📄 [README](./README.md) - هذا الملف
-- 📘 [دليل البدء السريع](./SETUP.md)
-- 📊 [ملخص المشروع](./PROJECT_SUMMARY.md)
-- 📖 [توثيق المشروع الكامل](./Project%20Documentation.md)
-- 📝 [تعليمات التطوير](./AI_DEVELOPMENT_INSTRUCTIONS.md)
-- 🎨 [تعليمات التصميم](./AI_Design_Instructions.md)
+- 📄 [README](./README.md) - This file
+- 📘 [Quick Start Guide](./docs/SETUP.md)
+- 📊 [Project Summary](./docs/PROJECT_SUMMARY.md)
+- 📖 [Full Project Documentation](./docs/Project%20Documentation.md)
 
 ---
 
-## 🤝 المساهمة
+## 🤝 Contributing
 
-نرحب بالمساهمات! للبدء:
+Contributions are welcome! To get started:
 
-1. **Fork** المشروع
-2. أنشئ **فرع** للميزة الجديدة
+1. **Fork** the project
+2. Create a **branch** for your feature
    ```bash
    git checkout -b feature/amazing-feature
    ```
-3. **Commit** التغييرات
+3. **Commit** your changes
    ```bash
-   git commit -m 'إضافة ميزة رائعة'
+   git commit -m 'Add amazing feature'
    ```
-4. **Push** للفرع
+4. **Push** to the branch
    ```bash
    git push origin feature/amazing-feature
    ```
-5. افتح **Pull Request**
+5. Open a **Pull Request**
 
-### معايير المساهمة
-- ✅ كود TypeScript صارم
-- ✅ اختبارات لكل ميزة جديدة
-- ✅ توثيق بالعربية
-- ✅ RTL في كل مكان
-- ✅ اتباع نمط الكود الحالي
-
----
-
-## 📄 الترخيص
-
-هذا المشروع مطور لـ **أكاديمية غراس العلم**.  
-جميع الحقوق محفوظة © 2025
+### Contribution Guidelines
+- ✅ Strict TypeScript code
+- ✅ Tests for every new feature
+- ✅ Arabic documentation
+- ✅ RTL everywhere
+- ✅ Follow existing code style
 
 ---
 
-## 🙏 شكر وتقدير
+## 📄 License
 
-- **فريق أكاديمية غراس العلم** - الرؤية والتوجيه
-- **React Team** - إطار عمل رائع
-- **Tailwind Labs** - نظام تصميم متميز
-- **TanStack** - أدوات قوية لإدارة الحالة
-- **المجتمع المفتوح** - جميع المكتبات المستخدمة
+This project is developed for **Ghras Al-Ilm Academy**.  
+All rights reserved © 2025
 
 ---
 
-## 💬 الدعم
+## 🙏 Acknowledgments
 
-### للحصول على المساعدة:
-1. 📖 اقرأ [دليل البدء السريع](./SETUP.md)
-2. 📊 راجع [ملخص المشروع](./PROJECT_SUMMARY.md)
-3. 🐛 افتح [Issue على GitHub](https://github.com/your-repo/issues)
-4. 💬 تواصل عبر Telegram: `@ghras_support`
+- **Ghras Al-Ilm Academy Team** - Vision and guidance
+- **React Team** - Amazing framework
+- **Tailwind Labs** - Outstanding design system
+- **TanStack** - Powerful state management tools
+- **Open Source Community** - All libraries used
 
-### روابط سريعة
-- 🌐 [الموقع الرسمي](https://ghras.com)
-- 📧 [البريد الإلكتروني](mailto:support@ghras.com)
-- 📱 [قناة Telegram](https://t.me/ghras_academy)
+---
+
+## 💬 Support
+
+### For assistance:
+1. 📖 Read the [Quick Start Guide](./docs/SETUP.md)
+2. 📊 Review the [Project Summary](./docs/PROJECT_SUMMARY.md)
+3. 🐛 Open an [Issue on GitHub](https://github.com/your-repo/issues)
+4. 💬 Contact via Telegram: `@ghras_support`
+
+### Quick Links
+- 🌐 [Official Website](https://ghras.com)
+- 📧 [Email](mailto:support@ghras.com)
+- 📱 [Telegram Channel](https://t.me/ghras_academy)
 
 ---
 
 <div align="center">
 
-**صُنع بـ ❤️ لأكاديمية غراس العلم**
+**Made with ❤️ for Ghras Al-Ilm Academy**
 
-**النسخة**: 1.0.0 | **آخر تحديث**: نوفمبر 2025
+**Version**: 1.0.0 | **Last Updated**: November 2025
 
-[⬆ العودة للأعلى](#غراس-مدير-المهام--gharas-task-manager)
+[⬆ Back to Top](#ghras-task-manager)
 
 </div>
-- مقارنة: بين أعضاء أو فرق، مع تصنيفات تلقائية.
-
-### 4. لوحة الإحصائيات والتقارير (Analytics)
-- تحليل نشاط: عدد المهام المنجزة، معدلات الالتزام.
-- رسوم بيانية تفاعلية باستخدام Recharts.
-- تصدير تقارير: PDF مع شعار الأكاديمية، Excel للبيانات الخام.
-
-### 5. نظام الشهادات (Certificates Generator)
-- تصميم قوالب شهادات رقمية (باستخدام HTML/CSS أو مكتبات مثل pdfmake).
-- توليد تلقائي: بناءً على نقاط (مثل >80% = شهادة تميز).
-- إرسال عبر البريد أو تحميل مباشر.
-
-## 🛠️ المتطلبات التقنية
-
-| القسم                     | التفاصيل                                        |
-| ------------------------- | ----------------------------------------------- |
-| **Frontend**              | Next.js (TypeScript) + Tailwind CSS + React Hook Form |
-| **Backend**               | Node.js (Express) مع TypeORM أو Prisma          |
-| **Database**              | PostgreSQL                                      |
-| **Authentication**        | JWT + bcrypt للهاشينغ                          |
-| **File Storage**          | AWS S3 أو Supabase                              |
-| **Deployment**            | Vercel للـ Frontend، Render للـ Backend        |
-| **Version Control**       | GitHub + GitHub Actions لـ CI/CD                |
-| **Analytics & Charts**    | Recharts أو Chart.js                            |
-| **Notifications**         | Nodemailer للبريد، Telegram API للإشعارات     |
-| **Testing**               | Jest للوحدات، Cypress للـ End-to-End           |
-| **Security**              | HTTPS, input validation بـ Joi, rate limiting   |
-
-## 📈 المخرجات المتوقعة
-
-- نظام ويب كامل مع صلاحيات: Admin, Team Leader, Member.
-- واجهة responsive وسهلة الاستخدام.
-
-## 🧠 المميزات الإضافية المقترحة
-
-- سجل نشاط كامل لكل عضو (Activity Log).
-- تقييم ذاتي مع مقارنة بالتقييم الإداري.
-- تقويم متكامل للمواعيد والتذكيرات.
-
-## 🚧 Backlog لـ Phase 1 (المرحلة الأولى)
-
-كـ Backlog، نقسم المتطلبات إلى User Stories احترافية، مع Acceptance Criteria. التركيز على MVP (Minimum Viable Product).
-
-### User Stories:
-
-1. **كإداري، أريد إدارة الأعضاء**  
-   - Acceptance: إضافة/تعديل/حذف أعضاء مع حقول (اسم، بريد، دور).  
-   - Priority: High. Effort: 8 hours.
-
-2. **كإداري، أريد تعيين مهام**  
-   - Acceptance: إنشاء مهمة مع مسؤول، بديل، موعد، وزن نقاط.  
-   - Priority: High. Effort: 12 hours.
-
-3. **كعضو، أريد عرض مهامي**  
-   - Acceptance: قائمة مهام، تحديث حالة، رفع ملفات.  
-   - Priority: Medium. Effort: 10 hours.
-
-4. **كإداري، أريد نظام تقييم**  
-   - Acceptance: نموذج تقييم أسبوعي مع معايير، حساب نقاط تلقائي.  
-   - Priority: High. Effort: 15 hours.
-
-5. **كمستخدم، أريد تسجيل دخول آمن**  
-   - Acceptance: JWT auth، reset password.  
-   - Priority: Critical. Effort: 6 hours.
-
-6. **كإداري، أريد تقارير**  
-   - Acceptance: توليد PDF/Excel، رسوم بيانية.  
-   - Priority: Medium. Effort: 10 hours.
-
-7. **كإداري، أريد توليد شهادات**  
-   - Acceptance: قوالب تلقائية بناءً على نقاط.  
-   - Priority: Low. Effort: 8 hours.
-
-
-## 🚀 خطة التطوير التفصيلية
-
-كمدير خبير، إليك الخطة من التصميم إلى النشر. نفترض فريقاً من 3 مبرمجين (Frontend Dev, Backend Dev, Full-Stack Lead). الجدول الزمني لـ 8 أسابيع (Phase 1).
-
-### Milestones:
-
-1. **Milestone 1: التصميم والتخطيط (أسبوع 1)**  
-   - مهام: رسم Wireframes (بـ Figma)، تصميم Database Schema، كتابة API Specs (Swagger).  
-   - مسؤول: Full-Stack Lead.  
-   - Output: مستند تصميم، repo جاهز على GitHub.
-
-2. **Milestone 2: بناء الـ Backend (أسابيع 2-3)**  
-   - مهام: إعداد Server (Express), Database (PostgreSQL), Auth (JWT), API لـ Users/Tasks/Evaluations.  
-   - مسؤول: Backend Dev.  
-   - Testing: Unit tests بـ Jest.
-
-3. **Milestone 3: بناء الـ Frontend (أسابيع 4-5)**  
-   - مهام: صفحات Dashboard, Member Panel, Forms بـ React Hook Form, Charts بـ Recharts.  
-   - مسؤول: Frontend Dev.  
-   - Integration: Connect to Backend APIs.
-
-4. **Milestone 4: التكامل والاختبار (أسبوع 6)**  
-   - مهام: استيراد Sheets، Notifications (Nodemailer), Security checks.  
-   - مسؤول: Full-Stack Lead.  
-   - Testing: E2E بـ Cypress، Bug fixing.
-
-5. **Milestone 5: النشر والصيانة (أسابيع 7-8)**  
-   - مهام: Deploy على Vercel/Render، CI/CD setup، User manual.  
-   - مسؤول: جميع الفريق.  
-   - Output: موقع حي، monitoring بـ Sentry.
-
-### جدول التنفيذ الزمني
-
-| الأسبوع | Milestone | مهام رئيسية | مسؤول |
-|---------|-----------|-------------|--------|
-| 1      | تصميم   | Wireframes, Schema | Lead  |
-| 2-3    | Backend | APIs, DB, Auth    | Backend |
-| 4-5    | Frontend| UI/UX, Integration| Frontend|
-| 6      | تكامل   | Testing, Fixes    | Lead  |
-| 7-8    | نشر     | Deploy, Docs      | All   |
-
-### تعليمات للفريق (كسينيور مدير):
-- استخدم Agile: Daily stand-ups، Sprint reviews كل أسبوعين.
-- Code Standards: ESLint، Prettier، Commit conventions (Conventional Commits).
-- Security First: Validate inputs، Use HTTPS، Store secrets in env.
-- Documentation: JSDoc للكود، API docs بـ Swagger.
-- Review Process: Pull Requests مع reviews من Lead قبل Merge.
-- إذا واجهت مشكلة، استشرني فوراً لتجنب التأخير.
-
-## 📝 Prompt احترافي شامل للتطوير
-
-"Build a professional full-stack web app named Ghras Admin for Ghras Al-Ilm academy. Replace Google Sheets with automated system for member management, task assignment, performance evaluation, scoring, reports, and certificates. Tech: Next.js (TypeScript) + Node.js (Express) + PostgreSQL + Tailwind CSS + JWT. Features: Admin dashboard (manage users/tasks/criteria), Member panel (view tasks/submit progress), Auto-scoring algorithm, Analytics charts (Recharts), PDF/Excel exports, Certificate generator (pdfmake), Notifications (Nodemailer/Telegram). Import initial data from Google Sheets API. Ensure responsive design, security (Joi validation, rate limiting), and deploy on Vercel/Render with CI/CD via GitHub Actions. Provide setup instructions and tests (Jest/Cypress)."
-
-لأي استفسارات، تواصل معي. جاهز للبدء!

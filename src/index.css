@@ -1,0 +1,300 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base RTL and Global Styles */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    direction: rtl;
+  }
+
+  body {
+    @apply bg-background text-textPrimary font-sans antialiased text-right;
+    direction: rtl;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  /* Headings */
+  h1 {
+    @apply text-3xl md:text-4xl font-bold mb-4;
+  }
+
+  h2 {
+    @apply text-2xl md:text-3xl font-bold mb-3;
+  }
+
+  h3 {
+    @apply text-xl md:text-2xl font-semibold mb-2;
+  }
+
+  h4 {
+    @apply text-lg md:text-xl font-semibold mb-2;
+  }
+
+  /* Form Elements */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="date"],
+  select,
+  textarea {
+    @apply border border-gray-300 dark:border-gray-600 rounded-md px-3 py-2 w-full
+           text-right bg-white dark:bg-gray-800 text-textPrimary dark:text-textPrimary-dark
+           focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none
+           transition-colors duration-200;
+  }
+
+  input[type="checkbox"] {
+    @apply rounded border-gray-300 dark:border-gray-600 text-primary 
+           focus:ring-2 focus:ring-primary/20;
+  }
+
+  label {
+    @apply block text-sm font-medium mb-1 text-textPrimary dark:text-textPrimary-dark;
+  }
+}
+
+/* Custom Component Utilities */
+@layer components {
+  /* Buttons */
+  .btn {
+    @apply px-4 py-2 rounded-md font-medium transition-all duration-200
+           focus:outline-none focus:ring-2 focus:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed
+           inline-flex items-center justify-center gap-2;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary hover:bg-primary-700 text-white 
+           focus:ring-primary shadow-sm;
+  }
+
+  .btn-secondary {
+    @apply btn bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600
+           text-textPrimary dark:text-textPrimary-dark focus:ring-gray-400;
+  }
+
+  .btn-danger {
+    @apply btn bg-red-600 hover:bg-red-700 text-white focus:ring-red-500;
+  }
+
+  .btn-ghost {
+    @apply btn bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800
+           text-textPrimary dark:text-textPrimary-dark;
+  }
+
+  /* Cards */
+  .card {
+    @apply bg-surface dark:bg-surface-dark rounded-lg shadow-md p-4
+           border border-gray-100 dark:border-gray-700
+           transition-shadow duration-200;
+  }
+
+  .card-hover {
+    @apply card hover:shadow-lg cursor-pointer;
+  }
+
+  /* Badges */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-status-new {
+    @apply badge bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300;
+  }
+
+  .badge-status-scheduled {
+    @apply badge bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300;
+  }
+
+  .badge-status-in_progress {
+    @apply badge bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300;
+  }
+
+  .badge-status-issue {
+    @apply badge bg-rose-100 dark:bg-rose-900/30 text-rose-800 dark:text-rose-300;
+  }
+
+  .badge-status-done {
+    @apply badge bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300;
+  }
+
+  .badge-status-docs {
+    @apply badge bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-300;
+  }
+
+  .badge-priority-very_urgent {
+    @apply badge bg-rose-600 text-white;
+  }
+
+  .badge-priority-urgent {
+    @apply badge bg-amber-500 text-white;
+  }
+
+  .badge-priority-medium {
+    @apply badge bg-purple-500 text-white;
+  }
+
+  .badge-priority-normal {
+    @apply badge bg-green-500 text-white;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4;
+  }
+
+  .modal-content {
+    @apply bg-surface dark:bg-surface-dark rounded-lg shadow-xl max-w-2xl w-full
+           max-h-[90vh] overflow-y-auto p-6;
+  }
+
+  /* Table */
+  .table {
+    @apply w-full border-collapse;
+  }
+
+  .table thead {
+    @apply bg-gray-50 dark:bg-gray-800;
+  }
+
+  .table th {
+    @apply p-3 text-right font-semibold text-sm text-textPrimary dark:text-textPrimary-dark
+           border-b border-gray-200 dark:border-gray-700;
+  }
+
+  .table td {
+    @apply p-3 text-right border-b border-gray-200 dark:border-gray-700
+           text-textPrimary dark:text-textPrimary-dark;
+  }
+
+  .table tbody tr {
+    @apply hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    @apply w-64 bg-surface dark:bg-surface-dark border-l border-gray-200 dark:border-gray-700
+           h-screen fixed top-0 right-0 flex flex-col shadow-lg z-40;
+  }
+
+  .sidebar-link {
+    @apply flex items-center gap-3 px-4 py-3 text-textPrimary dark:text-textPrimary-dark
+           hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors
+           text-right;
+  }
+
+  .sidebar-link-active {
+    @apply sidebar-link bg-primary/10 text-primary font-medium;
+  }
+
+  /* Loading Spinner */
+  .spinner {
+    @apply animate-spin rounded-full border-4 border-gray-200 border-t-primary;
+  }
+
+  /* Scrollbar Styles */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(203 213 225) transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgb(203 213 225);
+    border-radius: 3px;
+  }
+
+  .dark .scrollbar-thin {
+    scrollbar-color: rgb(71 85 105) transparent;
+  }
+
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgb(71 85 105);
+  }
+}
+
+/* Dark Mode Overrides */
+@layer utilities {
+  .dark body {
+    @apply bg-background-dark text-textPrimary-dark;
+  }
+
+  /* Custom Focus Styles */
+  .focus-ring {
+    @apply focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
+           focus-visible:outline-none;
+  }
+
+  /* RTL Utilities */
+  .ps-safe {
+    padding-inline-start: env(safe-area-inset-right);
+  }
+
+  .pe-safe {
+    padding-inline-end: env(safe-area-inset-left);
+  }
+}
+
+/* Animations */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.3s ease-out;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* React Hot Toast Overrides for RTL */
+[data-sonner-toast] {
+  direction: rtl !important;
+  text-align: right !important;
+}
