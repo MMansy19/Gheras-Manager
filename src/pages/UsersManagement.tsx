@@ -11,6 +11,10 @@ import { useRole } from '../hooks/useRole';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { AlertTriangle, Plus, Edit2, Search, Users } from 'lucide-react';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Button } from '../components/ui/button';
 
 export const UsersManagement = () => {
     const { role } = useRole();
@@ -112,7 +116,7 @@ export const UsersManagement = () => {
             <div className="card mb-6">
                 <div className="relative">
                     <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    <input
+                    <Input
                         type="text"
                         placeholder="البحث عن مستخدم (الاسم أو البريد الإلكتروني)"
                         value={searchTerm}
@@ -325,9 +329,9 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
         >
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label htmlFor="name">الاسم الكامل *</label>
-                        <input
+                    <div className="space-y-2">
+                        <Label htmlFor="name">الاسم الكامل *</Label>
+                        <Input
                             id="name"
                             type="text"
                             value={formData.name}
@@ -337,9 +341,9 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
                         />
                     </div>
 
-                    <div>
-                        <label htmlFor="email">البريد الإلكتروني *</label>
-                        <input
+                    <div className="space-y-2">
+                        <Label htmlFor="email">البريد الإلكتروني *</Label>
+                        <Input
                             id="email"
                             type="email"
                             value={formData.email}
@@ -352,9 +356,9 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
 
                 {!user && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label htmlFor="password">كلمة المرور *</label>
-                            <input
+                        <div className="space-y-2">
+                            <Label htmlFor="password">كلمة المرور *</Label>
+                            <Input
                                 id="password"
                                 type="password"
                                 value={formData.password}
@@ -365,9 +369,9 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
                             />
                         </div>
 
-                        <div>
-                            <label htmlFor="password_confirmation">تأكيد كلمة المرور *</label>
-                            <input
+                        <div className="space-y-2">
+                            <Label htmlFor="password_confirmation">تأكيد كلمة المرور *</Label>
+                            <Input
                                 id="password_confirmation"
                                 type="password"
                                 value={formData.password_confirmation}
@@ -383,19 +387,23 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label htmlFor="role">الدور</label>
-                        <select
-                            id="role"
+                    <div className="space-y-2">
+                        <Label htmlFor="role">الدور</Label>
+                        <Select
                             value={formData.role}
-                            onChange={(e) => setFormData({ ...formData, role: e.target.value as any })}
+                            onValueChange={(value) => setFormData({ ...formData, role: value as any })}
                         >
-                            {Object.entries(ROLE_LABELS).map(([value, label]) => (
-                                <option key={value} value={value}>
-                                    {label}
-                                </option>
-                            ))}
-                        </select>
+                            <SelectTrigger>
+                                <SelectValue placeholder="اختر الدور" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {Object.entries(ROLE_LABELS).map(([value, label]) => (
+                                    <SelectItem key={value} value={value}>
+                                        {label}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     <div>
@@ -415,9 +423,9 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label htmlFor="telegram_id">معرف تلجرام</label>
-                        <input
+                    <div className="space-y-2">
+                        <Label htmlFor="telegram_id">معرف تلجرام</Label>
+                        <Input
                             id="telegram_id"
                             type="text"
                             value={formData.telegram_id || ''}
@@ -426,9 +434,9 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
                         />
                     </div>
 
-                    <div>
-                        <label htmlFor="job_title">مجال العمل</label>
-                        <input
+                    <div className="space-y-2">
+                        <Label htmlFor="job_title">مجال العمل</Label>
+                        <Input
                             id="job_title"
                             type="text"
                             value={formData.job_title || ''}
@@ -438,9 +446,9 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
                     </div>
                 </div>
 
-                <div>
-                    <label htmlFor="weekly_hours">ساعات التفرغ الأسبوعية</label>
-                    <input
+                <div className="space-y-2">
+                    <Label htmlFor="weekly_hours">ساعات التفرغ الأسبوعية</Label>
+                    <Input
                         id="weekly_hours"
                         type="number"
                         value={formData.weekly_hours || 0}
@@ -451,8 +459,8 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
                     />
                 </div>
 
-                <div>
-                    <label>الفرق</label>
+                <div className="space-y-2">
+                    <Label>الفرق</Label>
                     <div className="flex flex-wrap gap-2 mt-2">
                         {teams?.map((team) => (
                             <label key={team.id} className="flex items-center gap-2 cursor-pointer">
@@ -468,12 +476,12 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
                 </div>
 
                 <div className="flex gap-2 justify-start pt-4">
-                    <button type="button" onClick={onClose} className="btn-secondary">
+                    <Button type="button" variant="outline" onClick={onClose}>
                         إلغاء
-                    </button>
-                    <button type="submit" className="btn-primary">
+                    </Button>
+                    <Button type="submit">
                         {user ? 'حفظ التعديلات' : 'إنشاء المستخدم'}
-                    </button>
+                    </Button>
                 </div>
             </form>
         </Modal>

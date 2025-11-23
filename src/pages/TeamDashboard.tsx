@@ -12,6 +12,12 @@ import { Modal } from '../components/Modal';
 import { useRole } from '../hooks/useRole';
 import { DateTime } from 'luxon';
 import { AlertTriangle, Plus, Edit2, Trash2, Clock } from 'lucide-react';
+import { Input } from '../components/ui/input';
+import { Textarea } from '../components/ui/textarea';
+import { Label } from '../components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { DatePicker } from '../components/ui/date-picker';
+import { Button } from '../components/ui/button';
 
 export const TeamDashboard = () => {
     const { teamSlug } = useParams<{ teamSlug: string }>();
@@ -152,12 +158,13 @@ export const TeamDashboard = () => {
 
             {/* Kanban Board */}
             <DragDropContext onDragEnd={handleDragEnd}>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-                    {statuses.map((status) => {
-                        const statusTasks = getTasksByStatus(status);
-                        return (
-                            <div key={status} className="flex flex-col">
-                                <div className={`bg-surface dark:bg-surface-dark rounded-t-lg p-3 border-r-4 ${statusColors[status]}`}>
+                <div className="overflow-x-auto -mx-4 px-4">
+                    <div className="flex gap-4 min-w-max pb-4">
+                        {statuses.map((status) => {
+                            const statusTasks = getTasksByStatus(status);
+                            return (
+                                <div key={status} className="flex flex-col w-72 flex-shrink-0">
+                                    <div className={`bg-surface dark:bg-surface-dark rounded-t-lg p-3 border-r-4 ${statusColors[status]}`}>
                                     <div className="flex items-center justify-between">
                                         <span className="font-bold text-sm">{STATUS_LABELS[status]}</span>
                                         <span className="badge bg-gray-200 dark:bg-gray-700">
@@ -207,9 +214,10 @@ export const TeamDashboard = () => {
                                         </div>
                                     )}
                                 </Droppable>
-                            </div>
-                        );
-                    })}
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
             </DragDropContext>
 
@@ -361,7 +369,7 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 description: task.description || '',
                 priority: task.priority || 'normal',
                 due_date: task.due_date || '',
-                assignee_id: task.assignee_id || '',
+                assignee_id: task.assignee_id || 'unassigned',
                 work_hours: task.work_hours || 0,
             });
         } else {
@@ -371,7 +379,7 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 description: '',
                 priority: 'normal',
                 due_date: '',
-                assignee_id: role === 'volunteer' && currentUserId ? currentUserId : '',
+                assignee_id: role === 'volunteer' && currentUserId ? currentUserId : 'unassigned',
                 work_hours: 0,
             });
         }
@@ -382,7 +390,7 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
         onSubmit({
             ...formData,
             team_id: teamId,
-            assignee_id: formData.assignee_id ? parseInt(formData.assignee_id as any) : null,
+            assignee_id: formData.assignee_id && formData.assignee_id !== 'unassigned' ? parseInt(formData.assignee_id as any) : null,
         });
         onClose();
     };
@@ -394,9 +402,9 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
             title={task ? 'تعديل المهمة' : 'إضافة مهمة جديدة'}
         >
             <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                    <label htmlFor="title">عنوان المهمة *</label>
-                    <input
+                <div className="space-y-2">
+                    <Label htmlFor="title">عنوان المهمة *</Label>
+                    <Input
                         id="title"
                         type="text"
                         value={formData.title}
@@ -406,9 +414,9 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     />
                 </div>
 
-                <div>
-                    <label htmlFor="description">الوصف</label>
-                    <textarea
+                <div className="space-y-2">
+                    <Label htmlFor="description">الوصف</Label>
+                    <Textarea
                         id="description"
                         value={formData.description || ''}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -418,73 +426,78 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <label htmlFor="priority">درجة الأهمية</label>
-                        <select
-                            id="priority"
+                    <div className="space-y-2">
+                        <Label htmlFor="priority">درجة الأهمية</Label>
+                        <Select
                             value={formData.priority}
-                            onChange={(e) => setFormData({ ...formData, priority: e.target.value as TaskPriority })}
+                            onValueChange={(value) => setFormData({ ...formData, priority: value as TaskPriority })}
                         >
-                            {Object.entries(PRIORITY_LABELS).map(([value, label]) => (
-                                <option key={value} value={value}>
-                                    {label}
-                                </option>
-                            ))}
-                        </select>
+                            <SelectTrigger>
+                                <SelectValue placeholder="اختر درجة الأهمية" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {Object.entries(PRIORITY_LABELS).map(([value, label]) => (
+                                    <SelectItem key={value} value={value}>
+                                        {label}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
 
-                    <div>
-                        <label htmlFor="due_date">تاريخ التسليم</label>
-                        <input
-                            id="due_date"
-                            type="date"
+                    <div className="space-y-2">
+                        <Label htmlFor="due_date">تاريخ التسليم</Label>
+                        <DatePicker
                             value={formData.due_date || ''}
-                            onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
+                            onChange={(date) => setFormData({ ...formData, due_date: date })}
+                            placeholder="اختر تاريخ التسليم"
                         />
                     </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                     {role === 'volunteer' ? (
-                        <div>
-                            <label htmlFor="assignee_id">تعيين إلى</label>
-                            <select
-                                id="assignee_id"
-                                value={formData.assignee_id || ''}
+                        <div className="space-y-2">
+                            <Label htmlFor="assignee_id">تعيين إلى</Label>
+                            <Select
+                                value={formData.assignee_id?.toString() || ''}
                                 disabled
-                                className="bg-gray-100 dark:bg-gray-700 cursor-not-allowed"
                             >
-                                {users?.filter(u => u.id === currentUserId).map((user) => (
-                                    <option key={user.id} value={user.id}>
-                                        {user.name} (أنت)
-                                    </option>
-                                ))}
-                            </select>
+                                <SelectTrigger className="bg-gray-100 dark:bg-gray-700 cursor-not-allowed">
+                                    <SelectValue>
+                                        {users?.find(u => u.id === currentUserId)?.name} (أنت)
+                                    </SelectValue>
+                                </SelectTrigger>
+                            </Select>
                             <p className="text-xs text-textSecondary dark:text-textSecondary-dark mt-1">
                                 الأعضاء يمكنهم إنشاء مهام لأنفسهم فقط
                             </p>
                         </div>
                     ) : (
-                        <div>
-                            <label htmlFor="assignee_id">تعيين إلى</label>
-                            <select
-                                id="assignee_id"
-                                value={formData.assignee_id || ''}
-                                onChange={(e) => setFormData({ ...formData, assignee_id: e.target.value })}
+                        <div className="space-y-2">
+                            <Label htmlFor="assignee_id">تعيين إلى</Label>
+                            <Select
+                                value={formData.assignee_id?.toString() || 'unassigned'}
+                                onValueChange={(value) => setFormData({ ...formData, assignee_id: value })}
                             >
-                                <option value="">غير معيّن</option>
-                                {users?.filter(u => u.status && currentTeam && u.teams.includes(currentTeam.id)).map((user) => (
-                                    <option key={user.id} value={user.id}>
-                                        {user.name} ({user.telegram_id})
-                                    </option>
-                                ))}
-                            </select>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="اختر المستخدم" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="unassigned">غير معيّن</SelectItem>
+                                    {users?.filter(u => u.status && currentTeam && u.teams.includes(currentTeam.id)).map((user) => (
+                                        <SelectItem key={user.id} value={user.id.toString()}>
+                                            {user.name} ({user.telegram_id})
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
                     )}
 
-                    <div>
-                        <label htmlFor="work_hours">ساعات العمل</label>
-                        <input
+                    <div className="space-y-2">
+                        <Label htmlFor="work_hours">ساعات العمل</Label>
+                        <Input
                             id="work_hours"
                             type="number"
                             step="0.5"
@@ -495,12 +508,12 @@ const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 </div>
 
                 <div className="flex gap-2 justify-start pt-4">
-                    <button type="button" onClick={onClose} className="btn-secondary">
+                    <Button type="button" variant="outline" onClick={onClose}>
                         إلغاء
-                    </button>
-                    <button type="submit" className="btn-primary">
+                    </Button>
+                    <Button type="submit">
                         {task ? 'حفظ التعديلات' : 'إنشاء المهمة'}
-                    </button>
+                    </Button>
                 </div>
             </form>
         </Modal>
