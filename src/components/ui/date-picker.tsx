@@ -50,7 +50,7 @@ export function DatePicker({ value, onChange, placeholder = "اختر التار
                 <Button
                     variant={"outline"}
                     className={cn(
-                        "w-full justify-between text-right font-normal border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900",
+                        "w-full justify-between text-right font-normal border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800",
                         !date && "text-textSecondary dark:text-textSecondary-dark",
                         className
                     )}
