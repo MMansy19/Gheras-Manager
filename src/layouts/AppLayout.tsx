@@ -75,7 +75,7 @@ export const AppLayout = () => {
                     <div className="flex justify-center mb-4">
                         <AlertTriangle className="w-16 h-16 text-red-500" />
                     </div>
-                    <h2 className="text-xl font-bold mb-2">خطأ في تحميل البيانات</h2>
+                    <h2 className="text-xl font-bold mb-1">خطأ في تحميل البيانات</h2>
                     <p className="text-textSecondary dark:text-textSecondary-dark mb-4">
                         {error instanceof Error ? error.message : 'حدث خطأ غير متوقع'}
                     </p>
@@ -131,7 +131,7 @@ export const AppLayout = () => {
                 <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                     <Link
                         to="/app"
-                        className={`flex items-center gap-3 mb-2 hover:opacity-80 transition-opacity ${sidebarCollapsed ? 'md:justify-center' : ''
+                        className={`flex items-center gap-3 mb-1 hover:opacity-80 transition-opacity ${sidebarCollapsed ? 'md:justify-center' : ''
                             }`}
                     >
                         <img
@@ -171,11 +171,11 @@ export const AppLayout = () => {
 
                 {/* Projects Navigation */}
                 <div className="flex-1 overflow-y-auto scrollbar-thin p-4">
-                    <h3 className={`text-xs font-bold text-textSecondary dark:text-textSecondary-dark uppercase mb-2 ${sidebarCollapsed ? 'md:hidden' : ''
+                    <h3 className={`text-xs font-bold text-textSecondary dark:text-textSecondary-dark uppercase mb-1 ${sidebarCollapsed ? 'md:hidden' : ''
                         }`}>
                         المشاريع
                     </h3>
-                    <nav className="space-y-1 mb-6">
+                    <nav className="space-y-1 mb-4 max-h-[30vh] overflow-y-auto scrollbar-thin">
                         {activeProjects?.map((project) => (
                             <Link
                                 key={project.id}
@@ -198,35 +198,11 @@ export const AppLayout = () => {
                         ))}
                     </nav>
 
-                    {/* User Profile Links */}
-                    <h3 className={`text-xs font-bold text-textSecondary dark:text-textSecondary-dark uppercase mb-2 ${sidebarCollapsed ? 'md:hidden' : ''
-                        }`}>
-                        الملف الشخصي
-                    </h3>
-                    <nav className="space-y-1 mb-6">
-                        <Link
-                            to="/app/profile"
-                            className={`
-                                flex items-center gap-3 px-4 py-3 rounded-md transition-colors text-right
-                                ${isActiveLink('/app/profile')
-                                    ? 'bg-primary/10 text-primary font-medium'
-                                    : 'text-textPrimary dark:text-textPrimary-dark hover:bg-gray-100 dark:hover:bg-gray-800'
-                                }
-                                ${sidebarCollapsed ? 'md:justify-center' : ''}
-                            `}
-                            onClick={() => setSidebarOpen(false)}
-                            title={sidebarCollapsed ? 'ملفي الشخصي' : ''}
-                        >
-                            <User className="w-5 h-5 flex-shrink-0" />
-                            <span className={`flex-1 ${sidebarCollapsed ? 'md:hidden' : ''
-                                }`}>ملفي الشخصي</span>
-                        </Link>
-                    </nav>
 
                     {/* Admin/Supervisor Links */}
                     {isAdminOrSupervisor && (
                         <>
-                            <h3 className={`text-xs font-bold text-textSecondary dark:text-textSecondary-dark uppercase mb-2 ${sidebarCollapsed ? 'md:hidden' : ''
+                            <h3 className={`text-xs font-bold text-textSecondary dark:text-textSecondary-dark uppercase mb-1 ${sidebarCollapsed ? 'md:hidden' : ''
                                 }`}>
                                 الإدارة
                             </h3>
@@ -268,6 +244,31 @@ export const AppLayout = () => {
                             </nav>
                         </>
                     )}
+                    {/* User Profile Links */}
+                    <h3 className={`mt-4 text-xs font-bold text-textSecondary dark:text-textSecondary-dark uppercase mb-1 ${sidebarCollapsed ? 'md:hidden' : ''
+                        }`}>
+                        الملف الشخصي
+                    </h3>
+
+                    <nav className="space-y-1">
+                        <Link
+                            to="/app/profile"
+                            className={`
+                                flex items-center gap-3 px-4 py-3 rounded-md transition-colors text-right
+                                ${isActiveLink('/app/profile')
+                                    ? 'bg-primary/10 text-primary font-medium'
+                                    : 'text-textPrimary dark:text-textPrimary-dark hover:bg-gray-100 dark:hover:bg-gray-800'
+                                }
+                                ${sidebarCollapsed ? 'md:justify-center' : ''}
+                            `}
+                            onClick={() => setSidebarOpen(false)}
+                            title={sidebarCollapsed ? 'ملفي الشخصي' : ''}
+                        >
+                            <User className="w-5 h-5 flex-shrink-0" />
+                            <span className={`flex-1 ${sidebarCollapsed ? 'md:hidden' : ''
+                                }`}>ملفي الشخصي</span>
+                        </Link>
+                    </nav>
                 </div>
 
                 {/* Logout Button */}
