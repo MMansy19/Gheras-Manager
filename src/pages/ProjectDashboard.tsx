@@ -382,6 +382,10 @@ export const ProjectDashboard = () => {
                     task={linkingTask}
                     isOpen={!!linkingTask}
                     onClose={() => setLinkingTask(null)}
+                    onViewTask={(task) => {
+                        setLinkingTask(null);
+                        setViewingTask(task);
+                    }}
                 />
             )}
 

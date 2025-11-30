@@ -334,6 +334,11 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                     task={task}
                     isOpen={isLinkingOpen}
                     onClose={() => setIsLinkingOpen(false)}
+                    onViewTask={(viewTask) => {
+                        setIsLinkingOpen(false);
+                        onClose();
+                        setTimeout(() => onViewTask(viewTask), 100);
+                    }}
                 />
             )}
         </Modal>

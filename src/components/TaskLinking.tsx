@@ -4,16 +4,17 @@ import { Modal } from './Modal';
 import { fetchTasks } from '../api/mockApi';
 import { fetchTaskLinks, createTaskLink, deleteTaskLink } from '../api/projectApi';
 import { Task } from '../types';
-import { Link as LinkIcon, Plus, X } from 'lucide-react';
+import { Link as LinkIcon, Plus, X, Eye } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 interface TaskLinkingProps {
     task: Task;
     isOpen: boolean;
     onClose: () => void;
+    onViewTask?: (task: Task) => void;
 }
 
-export const TaskLinking: React.FC<TaskLinkingProps> = ({ task, isOpen, onClose }) => {
+export const TaskLinking: React.FC<TaskLinkingProps> = ({ task, isOpen, onClose, onViewTask }) => {
     const queryClient = useQueryClient();
     const [selectedTaskIds, setSelectedTaskIds] = useState<number[]>([]);
 
@@ -91,7 +92,7 @@ export const TaskLinking: React.FC<TaskLinkingProps> = ({ task, isOpen, onClose 
                             {linkedTaskDetails.map(({ link, task: linkedTask }) => (
                                 <div
                                     key={link.id}
-                                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                                    className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                                 >
                                     <div className="flex-1">
                                         <span className="font-mono text-sm text-gray-500">#{linkedTask!.id}</span>
@@ -100,13 +101,27 @@ export const TaskLinking: React.FC<TaskLinkingProps> = ({ task, isOpen, onClose 
                                             {linkedTask!.description || 'لا يوجد وصف'}
                                         </p>
                                     </div>
-                                    <button
-                                        onClick={() => deleteLinkMutation.mutate(link.id)}
-                                        className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-2"
-                                        title="إلغاء الربط"
-                                    >
-                                        <X className="w-5 h-5" />
-                                    </button>
+                                    <div className="flex items-center gap-2">
+                                        {onViewTask && (
+                                            <button
+                                                onClick={() => {
+                                                    onClose();
+                                                    setTimeout(() => onViewTask(linkedTask!), 100);
+                                                }}
+                                                className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 p-2"
+                                                title="عرض التفاصيل"
+                                            >
+                                                <Eye className="w-5 h-5" />
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick={() => deleteLinkMutation.mutate(link.id)}
+                                            className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-2"
+                                            title="إلغاء الربط"
+                                        >
+                                            <X className="w-5 h-5" />
+                                        </button>
+                                    </div>
                                 </div>
                             ))}
                         </div>

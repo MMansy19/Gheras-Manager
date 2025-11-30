@@ -12,6 +12,8 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { TaskFilters } from '../components/TaskFilters';
 import { KanbanBoard } from '../components/KanbanBoard';
 import { TaskFormModal } from '../components/TaskFormModal';
+import { TaskDetailsModal } from '../components/TaskTableView';
+import { TaskLinking } from '../components/TaskLinking';
 import { useRole } from '../hooks/useRole';
 import { AlertTriangle, Plus } from 'lucide-react';
 
@@ -21,6 +23,8 @@ export const TeamDashboard = () => {
     const queryClient = useQueryClient();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [editingTask, setEditingTask] = useState<Task | null>(null);
+    const [viewingTask, setViewingTask] = useState<Task | null>(null);
+    const [linkingTask, setLinkingTask] = useState<Task | null>(null);
     const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
 
     // Filter states
@@ -204,6 +208,7 @@ export const TeamDashboard = () => {
                 statuses={statuses}
                 getTasksByStatus={getTasksByStatus}
                 onDragEnd={handleDragEnd}
+                onViewTask={setViewingTask}
                 onEditTask={setEditingTask}
                 onDeleteTask={setTaskToDelete}
                 isAdminOrSupervisor={isAdminOrSupervisor}
@@ -231,6 +236,29 @@ export const TeamDashboard = () => {
                     }
                 }}
             />
+
+            {/* Task Details Modal */}
+            <TaskDetailsModal
+                task={viewingTask}
+                isOpen={!!viewingTask}
+                onClose={() => setViewingTask(null)}
+                users={users}
+                canLinkTasks={true}
+                onViewTask={setViewingTask}
+            />
+
+            {/* Task Linking Modal */}
+            {linkingTask && (
+                <TaskLinking
+                    task={linkingTask}
+                    isOpen={!!linkingTask}
+                    onClose={() => setLinkingTask(null)}
+                    onViewTask={(task) => {
+                        setLinkingTask(null);
+                        setViewingTask(task);
+                    }}
+                />
+            )}
 
             {/* Delete Confirmation Dialog */}
             <ConfirmDialog
