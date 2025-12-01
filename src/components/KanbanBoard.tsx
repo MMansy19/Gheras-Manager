@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { TaskCard } from './TaskCard';
-import { Task, TaskStatus, STATUS_LABELS } from '../types';
+import { Task, TaskStatus, STATUS_LABELS, User } from '../types';
 
 interface KanbanBoardProps {
     statuses: TaskStatus[];
@@ -12,6 +12,8 @@ interface KanbanBoardProps {
     onViewTask?: (task: Task) => void;
     isAdminOrSupervisor: boolean;
     role?: string | null;
+    currentUserId?: number | null;
+    users?: User[];
 }
 
 export const KanbanBoard: React.FC<KanbanBoardProps> = ({
@@ -22,6 +24,9 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
     onDeleteTask,
     onViewTask,
     isAdminOrSupervisor,
+    role,
+    currentUserId,
+    users,
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -169,8 +174,10 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                                                                 <TaskCard
                                                                     task={task}
                                                                     onView={onViewTask ? () => onViewTask(task) : undefined}
-                                                                    onEdit={onEditTask ? () => onEditTask(task) : undefined}
+                                                                    onEdit={(onEditTask && (role !== 'volunteer' || task.assignee_id === currentUserId)) ? () => onEditTask(task) : undefined}
                                                                     onDelete={isAdminOrSupervisor && onDeleteTask ? () => onDeleteTask(task) : undefined}
+                                                                    users={users}
+                                                                    currentUserId={currentUserId}
                                                                 />
                                                             </div>
                                                         )}
