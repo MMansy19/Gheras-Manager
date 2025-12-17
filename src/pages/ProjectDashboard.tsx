@@ -16,6 +16,7 @@ import { TaskFormModal } from '../components/TaskFormModal';
 import { TaskLinking } from '../components/TaskLinking';
 import { useRole } from '../hooks/useRole';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { SearchableSelect, SearchableSelectContent, SearchableSelectItem, SearchableSelectTrigger, SearchableSelectValue } from '../components/ui/searchable-select';
 import { Label } from '../components/ui/label';
 import { Input } from '../components/ui/input';
 import { AlertTriangle, Plus, LayoutGrid, List, Search } from 'lucide-react';
@@ -42,6 +43,7 @@ export const ProjectDashboard = () => {
     const [filterAssignee, setFilterAssignee] = useState<string>('all');
     const [filterMinHours, setFilterMinHours] = useState<string>('');
     const [filterMaxHours, setFilterMaxHours] = useState<string>('');
+    const [assigneeSearch, setAssigneeSearch] = useState('');
 
     const { data: project, isLoading: projectLoading } = useQuery({
         queryKey: ['project', projectId],
@@ -329,20 +331,30 @@ export const ProjectDashboard = () => {
 
                         <div className="space-y-2">
                             <Label>المسؤول</Label>
-                            <Select value={filterAssignee} onValueChange={setFilterAssignee}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="اختر المسؤول" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">الكل</SelectItem>
-                                    <SelectItem value="unassigned">غير مُعين</SelectItem>
-                                    {users?.map((user) => (
-                                        <SelectItem key={user.id} value={user.id.toString()}>
-                                            {user.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <SearchableSelect value={filterAssignee} onValueChange={setFilterAssignee}>
+                                <SearchableSelectTrigger>
+                                    <SearchableSelectValue placeholder="اختر المسؤول" />
+                                </SearchableSelectTrigger>
+                                <SearchableSelectContent
+                                    onSearchChange={setAssigneeSearch}
+                                    searchPlaceholder="ابحث عن مستخدم..."
+                                >
+                                    <SearchableSelectItem value="all">الكل</SearchableSelectItem>
+                                    <SearchableSelectItem value="unassigned">غير مُعين</SearchableSelectItem>
+                                    {users
+                                        ?.filter(u => u.status && u)
+                                        .filter(user =>
+                                            assigneeSearch === '' ||
+                                            user.name.toLowerCase().includes(assigneeSearch.toLowerCase()) ||
+                                            user.telegram_id?.toLowerCase().includes(assigneeSearch.toLowerCase())
+                                        )
+                                        .map((user) => (
+                                            <SearchableSelectItem key={user.id} value={user.id.toString()}>
+                                                {user.name} ({user.telegram_id})
+                                            </SearchableSelectItem>
+                                        ))}
+                                </SearchableSelectContent>
+                            </SearchableSelect>
                         </div>
 
                         <div className="md:col-span-3 flex gap-2">

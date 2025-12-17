@@ -142,7 +142,7 @@ export const AppLayout = () => {
                             height="40"
                             className="h-10 w-10 object-contain flex-shrink-0"
                         />
-                        <h1 className={`text-xl font-bold text-primary whitespace-nowrap overflow-hidden ${sidebarCollapsed ? 'md:hidden' : ''}`}>
+                        <h1 className={`-mb-1 text-xl font-bold text-primary whitespace-nowrap overflow-hidden ${sidebarCollapsed ? 'md:hidden' : ''}`}>
                             غراس مدير المهام
                         </h1>
                     </Link>
