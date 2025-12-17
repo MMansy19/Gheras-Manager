@@ -4,6 +4,7 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { SearchableSelect, SearchableSelectContent, SearchableSelectItem, SearchableSelectTrigger, SearchableSelectValue } from './ui/searchable-select';
 import { DatePicker } from './ui/date-picker';
 import { Button } from './ui/button';
 import { Task, TaskPriority, TaskStatus, PRIORITY_CONFIG, STATUS_LABELS } from '../types';
@@ -44,6 +45,8 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
         assignee_id: '' as string | number,
         work_hours: 0,
     });
+
+    const [userSearch, setUserSearch] = useState('');
 
     // Update form data when task prop changes
     useEffect(() => {
@@ -139,25 +142,28 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="status">حالة المهمة</Label>
-                        <Select
-                            value={formData.status}
-                            onValueChange={(value) => setFormData({ ...formData, status: value as TaskStatus })}
-                            disabled={role === 'volunteer' && !isVolunteerEditing}
-                        >
-                            <SelectTrigger className={role === 'volunteer' && !isVolunteerEditing ? "bg-gray-100 dark:bg-gray-700 cursor-not-allowed" : ""}>
-                                <SelectValue placeholder="اختر الحالة" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {Object.entries(STATUS_LABELS).map(([value, label]) => (
-                                    <SelectItem key={value} value={value}>
-                                        {label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
+                    {/* Only show status field when editing existing task */}
+                    {task && (
+                        <div className="space-y-2">
+                            <Label htmlFor="status">حالة المهمة</Label>
+                            <Select
+                                value={formData.status}
+                                onValueChange={(value) => setFormData({ ...formData, status: value as TaskStatus })}
+                                disabled={role === 'volunteer' && !isVolunteerEditing}
+                            >
+                                <SelectTrigger className={role === 'volunteer' && !isVolunteerEditing ? "bg-gray-100 dark:bg-gray-700 cursor-not-allowed" : ""}>
+                                    <SelectValue placeholder="اختر الحالة" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                                        <SelectItem key={value} value={value}>
+                                            {label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
 
                     <div className="space-y-2">
                         <Label htmlFor="priority">درجة الأهمية</Label>
@@ -236,42 +242,55 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     ) : (
                         <div className="space-y-2">
                             <Label htmlFor="assignee_id">تعيين إلى</Label>
-                            <Select
+                            <SearchableSelect
                                 value={formData.assignee_id?.toString() || 'unassigned'}
                                 onValueChange={(value) => setFormData({ ...formData, assignee_id: value })}
                             >
-                                <SelectTrigger>
-                                    <SelectValue placeholder="اختر المستخدم" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="unassigned">غير معيّن</SelectItem>
-                                    {users?.filter(u => u.status && u).map((user) => (
-                                        <SelectItem key={user.id} value={user.id.toString()}>
-                                            {user.name} ({user.telegram_id})
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                                <SearchableSelectTrigger>
+                                    <SearchableSelectValue placeholder="اختر المستخدم" />
+                                </SearchableSelectTrigger>
+                                <SearchableSelectContent
+                                    onSearchChange={setUserSearch}
+                                    searchPlaceholder="ابحث عن مستخدم..."
+                                >
+                                    <SearchableSelectItem value="unassigned">غير معيّن</SearchableSelectItem>
+                                    {users
+                                        ?.filter(u => u.status && u)
+                                        .filter(user =>
+                                            userSearch === '' ||
+                                            user.name.toLowerCase().includes(userSearch.toLowerCase()) ||
+                                            user.telegram_id?.toLowerCase().includes(userSearch.toLowerCase())
+                                        )
+                                        .map((user) => (
+                                            <SearchableSelectItem key={user.id} value={user.id.toString()}>
+                                                {user.name} ({user.telegram_id})
+                                            </SearchableSelectItem>
+                                        ))}
+                                </SearchableSelectContent>
+                            </SearchableSelect>
                         </div>
                     )}
 
-                    <div className="space-y-2">
-                        <Label htmlFor="work_hours">ساعات العمل</Label>
-                        <Input
-                            id="work_hours"
-                            type="number"
-                            step="0.5"
-                            value={formData.work_hours}
-                            onChange={(e) => setFormData({ ...formData, work_hours: parseFloat(e.target.value) })}
-                            disabled={role === 'volunteer' && !isVolunteerEditing}
-                            className={role === 'volunteer' && !isVolunteerEditing ? "bg-gray-100 dark:bg-gray-700 cursor-not-allowed" : ""}
-                        />
-                        {isVolunteerEditing && (
-                            <p className="text-xs text-primary mt-1">
-                                يمكنك تحديث حالة المهمة وساعات العمل
-                            </p>
-                        )}
-                    </div>
+                    {/* Only show work_hours field when editing existing task */}
+                    {task && (
+                        <div className="space-y-2">
+                            <Label htmlFor="work_hours">ساعات العمل</Label>
+                            <Input
+                                id="work_hours"
+                                type="number"
+                                step="0.5"
+                                value={formData.work_hours}
+                                onChange={(e) => setFormData({ ...formData, work_hours: parseFloat(e.target.value) })}
+                                disabled={role === 'volunteer' && !isVolunteerEditing}
+                                className={role === 'volunteer' && !isVolunteerEditing ? "bg-gray-100 dark:bg-gray-700 cursor-not-allowed" : ""}
+                            />
+                            {isVolunteerEditing && (
+                                <p className="text-xs text-primary mt-1">
+                                    يمكنك تحديث حالة المهمة وساعات العمل
+                                </p>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex gap-2 justify-start pt-4">

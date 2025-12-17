@@ -17,7 +17,8 @@ import { TaskLinking } from '../components/TaskLinking';
 import { useRole } from '../hooks/useRole';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Label } from '../components/ui/label';
-import { AlertTriangle, Plus, LayoutGrid, List } from 'lucide-react';
+import { Input } from '../components/ui/input';
+import { AlertTriangle, Plus, LayoutGrid, List, Search } from 'lucide-react';
 
 export const ProjectDashboard = () => {
     const { projectId } = useParams<{ projectId: string }>();
@@ -35,6 +36,7 @@ export const ProjectDashboard = () => {
 
     // Filter states
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState<string>('');
     const [filterStatus, setFilterStatus] = useState<string>('all');
     const [filterPriority, setFilterPriority] = useState<string>('all');
     const [filterAssignee, setFilterAssignee] = useState<string>('all');
@@ -124,6 +126,15 @@ export const ProjectDashboard = () => {
     const applyFilters = (tasks: Task[]) => {
         let filtered = [...tasks];
 
+        // Apply search query
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase();
+            filtered = filtered.filter(task =>
+                task.title.toLowerCase().includes(query) ||
+                task.description?.toLowerCase().includes(query)
+            );
+        }
+
         // Apply status filter
         if (filterStatus !== 'all') {
             filtered = filtered.filter(task => task.status === filterStatus);
@@ -160,6 +171,7 @@ export const ProjectDashboard = () => {
     };
 
     const handleClearFilters = () => {
+        setSearchQuery('');
         setFilterStatus('all');
         setFilterPriority('all');
         setFilterAssignee('all');
@@ -248,12 +260,26 @@ export const ProjectDashboard = () => {
 
             {/* Filters */}
             <div className="card mb-6">
+                {/* Search Bar - Always visible */}
+                <div className="mb-4">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <Input
+                            type="text"
+                            placeholder="ابحث عن مهمة بالعنوان أو الوصف..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pr-10"
+                        />
+                    </div>
+                </div>
+
                 {/* Mobile Toggle Button */}
                 <button
                     onClick={() => setIsFilterOpen(!isFilterOpen)}
                     className="lg:hidden w-full flex items-center justify-between mb-4 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
                 >
-                    <span className="font-semibold">الفلاتر</span>
+                    <span className="font-semibold">الفلاتر المتقدمة</span>
                     <svg
                         className={`w-5 h-5 transform transition-transform ${isFilterOpen ? 'rotate-180' : ''}`}
                         fill="none"

@@ -62,11 +62,10 @@ export const TaskTableView: React.FC<TaskTableViewProps> = ({
                     <tr>
                         <th>ID</th>
                         <th>العنوان</th>
+                        <th>المسؤول</th>
                         <th>الحالة</th>
                         <th>الأولوية</th>
-                        <th>تاريخ الإنشاء</th>
                         <th>تاريخ الاستحقاق</th>
-                        <th>المسؤول</th>
                         <th>الإجراءات</th>
                     </tr>
                 </thead>
@@ -78,28 +77,6 @@ export const TaskTableView: React.FC<TaskTableViewProps> = ({
                             </td>
                             <td>
                                 <span className="font-semibold">{task.title}</span>
-                            </td>
-                            <td>
-                                <span className={`badge badge-status-${task.status}`}>
-                                    {STATUS_LABELS[task.status]}
-                                </span>
-                            </td>
-                            <td>
-                                <span
-                                    className={`badge ${PRIORITY_CONFIG[task.priority].bgClass} ${PRIORITY_CONFIG[task.priority].textClass}`}
-                                >
-                                    {PRIORITY_CONFIG[task.priority].label}
-                                </span>
-                            </td>
-                            <td>
-                                <span className="text-sm">
-                                    {formatDate(task.created_at)}
-                                </span>
-                            </td>
-                            <td>
-                                <span className="text-sm">
-                                    {formatDate(task.due_date)}
-                                </span>
                             </td>
                             <td>
                                 {task.assignee_id ? (
@@ -130,6 +107,24 @@ export const TaskTableView: React.FC<TaskTableViewProps> = ({
                                 ) : (
                                     <span className="text-sm text-gray-400">غير مُعين</span>
                                 )}
+                            </td>
+
+                            <td>
+                                <span className={`badge badge-status-${task.status}`}>
+                                    {STATUS_LABELS[task.status]}
+                                </span>
+                            </td>
+                            <td>
+                                <span
+                                    className={`badge ${PRIORITY_CONFIG[task.priority].bgClass} ${PRIORITY_CONFIG[task.priority].textClass}`}
+                                >
+                                    {PRIORITY_CONFIG[task.priority].label}
+                                </span>
+                            </td>
+                            <td>
+                                <span className="text-sm">
+                                    {formatDate(task.due_date)}
+                                </span>
                             </td>
                             <td>
                                 <div className="flex gap-2 justify-start">
