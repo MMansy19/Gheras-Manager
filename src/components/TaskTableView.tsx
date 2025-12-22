@@ -1,7 +1,7 @@
 'use client';
 import { Task, STATUS_LABELS, PRIORITY_CONFIG, User } from '../types';
 import { EmptyState } from './EmptyState';
-import { ListTodo, Edit2, Trash2, Eye, Link as LinkIcon } from 'lucide-react';
+import { ListTodo, Edit2, Trash2, Eye, Link as LinkIcon, MoreHorizontal } from 'lucide-react';
 import { Modal } from './Modal';
 import { TaskLinking } from './TaskLinking';
 import { useState } from 'react';
@@ -30,6 +30,29 @@ export const TaskTableView: React.FC<TaskTableViewProps> = ({
     role,
     currentUserId,
 }) => {
+    const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+    const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
+
+    const handleMenuToggle = (taskId: number, event: React.MouseEvent<HTMLButtonElement>) => {
+        if (openMenuId === taskId) {
+            setOpenMenuId(null);
+            setMenuPosition(null);
+            return;
+        }
+
+        const button = event.currentTarget;
+        const rect = button.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const menuHeight = 120;
+
+        // Calculate position for fixed overlay
+        const top = spaceBelow < menuHeight ? rect.top - menuHeight : rect.bottom;
+        const left = rect.left;
+
+        setMenuPosition({ top, left });
+        setOpenMenuId(taskId);
+    };
+
     const getUserName = (userId: number | null | undefined) => {
         if (!userId) return 'غير مُعين';
         const user = users?.find(u => u.id === userId);
@@ -71,7 +94,11 @@ export const TaskTableView: React.FC<TaskTableViewProps> = ({
                 </thead>
                 <tbody>
                     {tasks.map((task) => (
-                        <tr key={task.id}>
+                        <tr
+                            key={task.id}
+                            onClick={() => onViewTask(task)}
+                            className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                        >
                             <td className="min-w-[60px] md:min-w-[80px]">
                                 <span className="font-mono text-sm">#{task.id}</span>
                             </td>
@@ -127,38 +154,90 @@ export const TaskTableView: React.FC<TaskTableViewProps> = ({
                                 </span>
                             </td>
                             <td className="min-w-[120px] md:min-w-[150px]">
-                                <div className="flex gap-2 justify-start">
+                                <div className="relative" onClick={(e) => e.stopPropagation()}>
                                     <button
-                                        onClick={() => onViewTask(task)}
-                                        className="text-sm btn-secondary md:p-3 p-2 flex items-center gap-1"
-                                        title="عرض التفاصيل"
+                                        onClick={(e) => handleMenuToggle(task.id, e)}
+                                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+                                        title="الإجراءات"
                                     >
-                                        <Eye className="w-3 h-3" />
+                                        <MoreHorizontal className="w-4 h-4" />
                                     </button>
-                                    {(role !== 'volunteer' || task.assignee_id === currentUserId) && (
-                                        <button
-                                            onClick={() => onEditTask(task)}
-                                            className="text-sm btn-secondary md:p-3 p-2 flex items-center gap-1"
-                                            title="تعديل"
-                                        >
-                                            <Edit2 className="w-3 h-3" />
-                                        </button>
-                                    )}
-                                    {isAdminOrSupervisor && (
-                                        <button
-                                            onClick={() => onDeleteTask(task)}
-                                            className="text-sm bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 md:p-3 p-2 rounded-md flex items-center gap-1 transition-colors"
-                                            title="حذف"
-                                        >
-                                            <Trash2 className="w-3 h-3" />
-                                        </button>
-                                    )}
                                 </div>
                             </td>
                         </tr>
                     ))}
                 </tbody>
             </table>
+
+            {/* Global Dropdown Menu Overlay */}
+            {openMenuId !== null && menuPosition && (
+                <>
+                    {/* Backdrop */}
+                    <div
+                        className="fixed inset-0 z-[100]"
+                        onClick={() => {
+                            setOpenMenuId(null);
+                            setMenuPosition(null);
+                        }}
+                    />
+
+                    {/* Dropdown Menu */}
+                    <div
+                        className="fixed w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-[101] py-1"
+                        style={{
+                            top: `${menuPosition.top}px`,
+                            left: `${menuPosition.left}px`,
+                        }}
+                    >
+                        <button
+                            onClick={() => {
+                                const task = tasks.find(t => t.id === openMenuId);
+                                if (task) onViewTask(task);
+                                setOpenMenuId(null);
+                                setMenuPosition(null);
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-textPrimary dark:text-textPrimary-dark hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-right"
+                        >
+                            <Eye className="w-4 h-4" />
+                            <span>عرض التفاصيل</span>
+                        </button>
+
+                        {(() => {
+                            const task = tasks.find(t => t.id === openMenuId);
+                            return (role !== 'volunteer' || task?.assignee_id === currentUserId) && (
+                                <button
+                                    onClick={() => {
+                                        if (task) onEditTask(task);
+                                        setOpenMenuId(null);
+                                        setMenuPosition(null);
+                                    }}
+                                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-textPrimary dark:text-textPrimary-dark hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-right"
+                                >
+                                    <Edit2 className="w-4 h-4" />
+                                    <span>تعديل</span>
+                                </button>
+                            );
+                        })()}
+
+                        {isAdminOrSupervisor && (() => {
+                            const task = tasks.find(t => t.id === openMenuId);
+                            return (
+                                <button
+                                    onClick={() => {
+                                        if (task) onDeleteTask(task);
+                                        setOpenMenuId(null);
+                                        setMenuPosition(null);
+                                    }}
+                                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-right"
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                    <span>حذف</span>
+                                </button>
+                            );
+                        })()}
+                    </div>
+                </>
+            )}
         </div>
     );
 };

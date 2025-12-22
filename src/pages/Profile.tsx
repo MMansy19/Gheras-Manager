@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ROLE_LABELS, WORK_FIELDS, User as UserType } from '../types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { User, Mail, MapPin, Briefcase, Calendar, Clock, Users as UsersIcon, Edit2, Save, X } from 'lucide-react';
+import { User, Mail, MapPin, Briefcase, Calendar, Clock, Users as UsersIcon, Save, X } from 'lucide-react';
 
 export const Profile = () => {
     const queryClient = useQueryClient();
