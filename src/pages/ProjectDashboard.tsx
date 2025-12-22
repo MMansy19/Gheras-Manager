@@ -214,9 +214,9 @@ export const ProjectDashboard = () => {
     return (
         <div>
             {/* Header */}
-            <div className="mb-6">
+            <div className="md:mb-6 mb-2">
                 <div className="flex flex-col sm:flex-row-reverse items-start sm:items-center justify-between gap-4 mb-4">
-                    <div className="flex gap-2 md:mt-auto">
+                    <div className="flex gap-2">
                         <button
                             onClick={() => setIsCreateModalOpen(true)}
                             className="btn-primary flex items-center gap-2"

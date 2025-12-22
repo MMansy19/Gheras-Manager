@@ -2,33 +2,38 @@
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { fetchProjects, createProject, updateProject, deleteProject } from '../api/projectApi';
-import { fetchTasks } from '../api/mockApi';
+import { fetchTasks, fetchUsers, updateTask, createTask, deleteTask } from '../api/mockApi';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { EmptyState } from '../components/EmptyState';
 import { Modal } from '../components/Modal';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { TaskTableView, TaskDetailsModal } from '../components/TaskTableView';
+import { TaskFormModal } from '../components/TaskFormModal';
 import { useRole } from '../hooks/useRole';
-import { useEffect, useState } from 'react';
-import { FolderKanban, AlertTriangle, Plus, Edit2, Trash2, CheckCircle2, Clock, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
-import { Project, CreateProjectInput, Task, STATUS_LABELS } from '../types';
+import { useEffect, useState, useRef } from 'react';
+import { FolderKanban, AlertTriangle, Plus, Edit2, Trash2 } from 'lucide-react';
+import { Project, CreateProjectInput, Task } from '../types';
 import toast from 'react-hot-toast';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Button } from '../components/ui/button';
-import { PriorityBadge } from '../components/PriorityBadge';
 
 export const Home = () => {
     const navigate = useNavigate();
     const { role } = useRole();
     const queryClient = useQueryClient();
+    const tabsContainerRef = useRef<HTMLDivElement>(null);
     const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
     const [editingProject, setEditingProject] = useState<Project | null>(null);
     const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
-    const [expandedProjectId, setExpandedProjectId] = useState<number | null>(null);
+    const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
+    const [editingTask, setEditingTask] = useState<Task | null>(null);
+    const [viewingTask, setViewingTask] = useState<Task | null>(null);
+    const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
+    const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false);
 
-    const toggleProject = (projectId: number) => {
-        setExpandedProjectId(prev => prev === projectId ? null : projectId);
-    };
+    // For volunteers, we simulate getting the current user ID
+    const currentUserId = role === 'volunteer' ? 3 : null;
 
     // Redirect to role selection if no role
     useEffect(() => {
@@ -42,11 +47,15 @@ export const Home = () => {
         queryFn: fetchProjects,
     });
 
-    const { data: allTasks } = useQuery({
+    const { data: allTasks, isLoading: tasksLoading } = useQuery({
         queryKey: ['tasks'],
         queryFn: () => fetchTasks(),
     });
 
+    const { data: users } = useQuery({
+        queryKey: ['users'],
+        queryFn: fetchUsers,
+    });
 
     const createProjectMutation = useMutation({
         mutationFn: createProject,
@@ -85,26 +94,71 @@ export const Home = () => {
         },
     });
 
+    const updateTaskMutation = useMutation({
+        mutationFn: ({ id, data }: { id: number; data: Partial<Task> }) =>
+            updateTask(id, data),
+        onMutate: async ({ id, data }) => {
+            await queryClient.cancelQueries({ queryKey: ['tasks'] });
+            const previousTasks = queryClient.getQueryData<Task[]>(['tasks']);
+
+            queryClient.setQueryData<Task[]>(['tasks'], (old) =>
+                old?.map((task) => (task.id === id ? { ...task, ...data } : task))
+            );
+
+            return { previousTasks };
+        },
+        onError: (_err, _variables, context) => {
+            queryClient.setQueryData(['tasks'], context?.previousTasks);
+            toast.error('فشل تحديث المهمة');
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['tasks'] });
+            toast.success('تم تحديث المهمة بنجاح');
+        },
+    });
+
+    const createTaskMutation = useMutation({
+        mutationFn: createTask,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['tasks'] });
+            setIsCreateTaskModalOpen(false);
+            toast.success('تم إنشاء المهمة بنجاح');
+        },
+        onError: () => {
+            toast.error('فشل إنشاء المهمة');
+        },
+    });
+
+    const deleteTaskMutation = useMutation({
+        mutationFn: deleteTask,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['tasks'] });
+            toast.success('تم حذف المهمة بنجاح');
+        },
+        onError: () => {
+            toast.error('فشل حذف المهمة');
+        },
+    });
+
     const activeProjects = projects?.filter(p => p.active);
     const isAdminOrSupervisor = role === 'admin' || role === 'supervisor';
+
+    // Auto-select first project on load
+    useEffect(() => {
+        if (activeProjects && activeProjects.length > 0 && !selectedProjectId) {
+            setSelectedProjectId(activeProjects[0].id);
+        }
+    }, [activeProjects, selectedProjectId]);
 
     // Get tasks for a specific project
     const getProjectTasks = (projectId: number): Task[] => {
         return allTasks?.filter(task => task.project_id === projectId) || [];
     };
 
-    // Get task counts by status
-    const getTaskCounts = (projectId: number) => {
-        const tasks = getProjectTasks(projectId);
-        return {
-            total: tasks.length,
-            done: tasks.filter(t => t.status === 'done').length,
-            inProgress: tasks.filter(t => t.status === 'in_progress').length,
-            issue: tasks.filter(t => t.status === 'issue').length,
-        };
-    };
+    const selectedProject = activeProjects?.find(p => p.id === selectedProjectId);
+    const projectTasks = selectedProjectId ? getProjectTasks(selectedProjectId) : [];
 
-    if (projectsLoading) {
+    if (projectsLoading || tasksLoading) {
         return <LoadingSpinner message="جاري تحميل البيانات..." />;
     }
 
@@ -120,184 +174,154 @@ export const Home = () => {
     }
 
     return (
-        <div>
-            {/* Header */}
-            <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-4xl font-bold mb-2 text-primary">المشاريع</h1>
-                    <p className="text-lg text-textSecondary dark:text-textSecondary-dark">
-                        اختر مشروعًا لعرض وإدارة المهام الخاصة به
-                    </p>
-                </div>
-                {isAdminOrSupervisor && (
-                    <button
-                        onClick={() => setIsCreateProjectOpen(true)}
-                        className="btn-primary flex items-center gap-2 md:mt-auto"
-                    >
-                        <Plus className="w-5 h-5" />
-                        إضافة مشروع جديد
-                    </button>
-                )}
-
-            </div>
-            {/* Projects Grid */}
-            {activeProjects && activeProjects.length > 0 ? (
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-8">
-                    {activeProjects.map((project) => {
-                        const projectTasks = getProjectTasks(project.id);
-                        const taskCounts = getTaskCounts(project.id);
-                        const isExpanded = expandedProjectId === project.id;
-
-                        return (
-                            <div
-                                key={project.id}
-                                className="card border-2 border-gray-200 dark:border-gray-700 hover:border-primary/50 transition-all"
-                            >
-                                {/* Project Header - Clickable to expand/collapse */}
-                                <div
-                                    className="flex items-center justify-between cursor-pointer group"
-                                    onClick={() => toggleProject(project.id)}
+        <div className="min-h-screen">
+            {/* Header Section */}
+            <div className="mb-6">
+                <div className="flex flex-col sm:flex-row-reverse items-start sm:items-center justify-between gap-4 mb-6">
+                    <div className="flex gap-2">
+                        {isAdminOrSupervisor && (
+                            <>
+                                <button
+                                    onClick={() => setIsCreateProjectOpen(true)}
+                                    className="btn-secondary flex items-center gap-2"
+                                    title="إضافة مشروع جديد"
                                 >
-                                    <div className="flex items-center gap-4 flex-1">
-                                        <div className="p-3 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                                            <FolderKanban className="w-8 h-8 text-primary" />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">
-                                                {project.name}
-                                            </h3>
-                                            {project.description && (
-                                                <p className="text-textSecondary dark:text-textSecondary-dark text-sm line-clamp-1 mb-2">
-                                                    {project.description}
-                                                </p>
-                                            )}
-                                            {/* Task Statistics */}
-                                            <div className="flex flex-wrap gap-2 text-xs">
-                                                <span className="flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded">
-                                                    <CheckCircle2 className="w-3 h-3" />
-                                                    {taskCounts.done} / {taskCounts.total} مكتمل
-                                                </span>
-                                                {taskCounts.inProgress > 0 && (
-                                                    <span className="flex items-center gap-1 px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded">
-                                                        <Clock className="w-3 h-3" />
-                                                        {taskCounts.inProgress} قيد التنفيذ
-                                                    </span>
-                                                )}
-                                                {taskCounts.issue > 0 && (
-                                                    <span className="flex items-center gap-1 px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded">
-                                                        <AlertCircle className="w-3 h-3" />
-                                                        {taskCounts.issue} مشكلة
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <Plus className="w-5 h-5" />
+                                    <span className="text-sm sm:text-md">مشروع جديد</span>
+                                </button>
+                                {selectedProjectId && (
+                                    <button
+                                        onClick={() => setIsCreateTaskModalOpen(true)}
+                                        className="btn-primary flex items-center gap-2"
+                                        title="إضافة مهمة جديدة"
+                                    >
+                                        <Plus className="w-5 h-5" />
+                                        <span className="text-sm sm:text-md">مهمة جديدة</span>
+                                    </button>
+                                )}
+                            </>
+                        )}
+                    </div>
+                    <div>
+                        <h1 className="text-3xl font-bold mb-2 text-primary">المشاريع والمهام</h1>
+                        <p className="text-textSecondary dark:text-textSecondary-dark">
+                            اختر مشروعًا لعرض وإدارة المهام الخاصة به
+                        </p>
+                    </div>
+                </div>
 
-                                    <div className="flex flex-col md:flex-row items-center gap-2">
-                                        {isAdminOrSupervisor && (
-                                            <div className="flex flex-col md:flex-row gap-2" onClick={(e) => e.stopPropagation()}>
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setEditingProject(project);
-                                                    }}
-                                                    className="text-sm btn-secondary md:p-3 p-2"
-                                                    title="تعديل"
-                                                >
-                                                    <Edit2 className="w-4 h-4" />
-                                                </button>
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setProjectToDelete(project);
-                                                    }}
-                                                    className="text-sm bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 md:p-3 p-2 rounded-md transition-colors"
-                                                    title="حذف"
-                                                >
-                                                    <Trash2 className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        )}
+                {/* Projects Tabs Section */}
+                {activeProjects && activeProjects.length > 0 ? (
+                    <div className="relative">
+                        {/* Tabs Container */}
+                        <div
+                            ref={tabsContainerRef}
+                            className="flex gap-2 overflow-x-auto scrollbar-hide pb-4 px-8"
+                            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                        >
+                            {activeProjects.map((project) => {
+                                const isActive = selectedProjectId === project.id;
+                                const taskCount = getProjectTasks(project.id).length;
 
-                                        {/* Expand/Collapse Icon */}
-                                        <div className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors">
-                                            {isExpanded ? (
-                                                <ChevronUp className="w-6 h-6 text-primary" />
-                                            ) : (
-                                                <ChevronDown className="w-6 h-6 text-gray-500" />
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Tasks List - Collapsible */}
-                                {isExpanded && (
-                                    <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 animate-in slide-in-from-top-2 duration-300">
-                                        <div className="space-y-2">
-                                            <div className="flex items-center justify-between mb-3">
-                                                <h4 className="text-sm font-semibold text-textSecondary dark:text-textSecondary-dark">
-                                                    المهام ({projectTasks.length})
-                                                </h4>
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        navigate(`/app/project/${project.id}`);
-                                                    }}
-                                                    className="text-sm text-primary hover:underline"
-                                                >
-                                                    عرض في صفحة المشروع
-                                                </button>
-                                            </div>
-                                            {projectTasks.length > 0 ? (
-                                                <div className="space-y-2 max-h-96 overflow-y-auto scrollbar-thin">
-                                                    {projectTasks.map((task) => (
-                                                        <div
-                                                            key={task.id}
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                navigate(`/app/project/${project.id}`);
-                                                            }}
-                                                            className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors group/task"
-                                                        >
-                                                            <div className="flex-1 min-w-0">
-                                                                <div className="flex items-center gap-2 mb-1">
-                                                                    <PriorityBadge priority={task.priority} />
-                                                                    <span className="text-xs px-2 py-0.5 rounded bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300">
-                                                                        {STATUS_LABELS[task.status]}
-                                                                    </span>
-                                                                </div>
-                                                                <p className="text-sm font-medium truncate group-hover/task:text-primary transition-colors">
-                                                                    {task.title}
-                                                                </p>
-                                                                {task.due_date && (
-                                                                    <p className="text-xs text-textSecondary dark:text-textSecondary-dark mt-1">
-                                                                        التسليم: {new Date(task.due_date).toLocaleDateString('ar-EG')}
-                                                                    </p>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    ))}
+                                return (
+                                    <button
+                                        key={project.id}
+                                        onClick={() => setSelectedProjectId(project.id)}
+                                        className={`
+                                            group relative flex-shrink-0 px-6 py-4 rounded-lg transition-all duration-200
+                                            ${isActive
+                                                ? 'bg-primary text-white shadow-lg scale-105'
+                                                : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-md hover:shadow-lg'
+                                            }
+                                        `}
+                                    >
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            <FolderKanban className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-white' : 'text-primary'}`} />
+                                            <div className="text-right min-w-0">
+                                                <div className={`font-semibold whitespace-nowrap ${isActive ? 'text-white' : 'text-textPrimary dark:text-textPrimary-dark'}`}>
+                                                    {project.name}
                                                 </div>
-                                            ) : (
-                                                <p className="text-sm text-textSecondary dark:text-textSecondary-dark text-center py-4">
-                                                    لا توجد مهام في هذا المشروع
-                                                </p>
-                                            )}
+                                                <div className={`text-xs mt-1 ${isActive ? 'text-white/80' : 'text-textSecondary dark:text-textSecondary-dark'}`}>
+                                                    {taskCount} مهمة
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                ) : (
+                    <EmptyState
+                        icon={<FolderKanban className="w-16 h-16 text-gray-400" />}
+                        title="لا توجد مشاريع"
+                        description="لم يتم العثور على مشاريع نشطة."
+                        action={isAdminOrSupervisor ? {
+                            label: 'إضافة مشروع جديد',
+                            onClick: () => setIsCreateProjectOpen(true)
+                        } : undefined}
+                    />
+                )}
+            </div>
+
+            {/* Tasks Section */}
+            {selectedProject && (
+                <div className="space-y-6">
+                    {/* Project Info Banner */}
+                    <div className="card bg-gradient-to-r from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20 border-2 border-primary/20">
+                        <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                                <h2 className="text-2xl font-bold mb-2">{selectedProject.name}</h2>
+                                {selectedProject.description && (
+                                    <p className="text-textSecondary dark:text-textSecondary-dark">
+                                        {selectedProject.description}
+                                    </p>
                                 )}
                             </div>
-                        );
-                    })}
+                            <div className="flex items-start gap-4">
+                                {isAdminOrSupervisor && (
+                                    <div className="flex flex-col sm:flex-row gap-2">
+                                        <button
+                                            onClick={() => setEditingProject(selectedProject)}
+                                            className="p-2 rounded-lg bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors shadow-sm"
+                                            title="تعديل المشروع"
+                                        >
+                                            <Edit2 className="w-4 h-4 text-textPrimary dark:text-textPrimary-dark" />
+                                        </button>
+                                        <button
+                                            onClick={() => setProjectToDelete(selectedProject)}
+                                            className="p-2 rounded-lg bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors shadow-sm"
+                                            title="حذف المشروع"
+                                        >
+                                            <Trash2 className="w-4 h-4 text-red-600 dark:text-red-400" />
+                                        </button>
+                                    </div>
+                                )}
+                                <div className="text-left hidden sm:block">
+                                    <div className="text-3xl font-bold text-primary">{projectTasks.length}</div>
+                                    <div className="text-sm text-textSecondary dark:text-textSecondary-dark">مهمة</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Tasks Table */}
+                    <div className="card">
+                        <TaskTableView
+                            tasks={projectTasks}
+                            users={users}
+                            onEditTask={setEditingTask}
+                            onDeleteTask={setTaskToDelete}
+                            onViewTask={setViewingTask}
+                            isAdminOrSupervisor={isAdminOrSupervisor}
+                            role={role}
+                            currentUserId={currentUserId}
+                        />
+                    </div>
                 </div>
-            ) : (
-                <EmptyState
-                    icon={<FolderKanban className="w-16 h-16 text-gray-400" />}
-                    title="لا توجد مشاريع"
-                    description="لم يتم العثور على مشاريع نشطة."
-                />
             )}
 
+            {/* Modals */}
             {/* Create/Edit Project Modal */}
             <ProjectFormModal
                 isOpen={isCreateProjectOpen || !!editingProject}
@@ -315,6 +339,42 @@ export const Home = () => {
                 }}
             />
 
+            {/* Create/Edit Task Modal */}
+            {selectedProjectId && (
+                <TaskFormModal
+                    isOpen={isCreateTaskModalOpen || !!editingTask}
+                    onClose={() => {
+                        setIsCreateTaskModalOpen(false);
+                        setEditingTask(null);
+                    }}
+                    task={editingTask}
+                    users={users}
+                    role={role}
+                    onSubmit={(data) => {
+                        if (editingTask) {
+                            updateTaskMutation.mutate({ id: editingTask.id, data });
+                            setEditingTask(null);
+                        } else {
+                            createTaskMutation.mutate({
+                                ...data,
+                                created_by: 1,
+                                project_id: selectedProjectId
+                            });
+                        }
+                    }}
+                />
+            )}
+
+            {/* Task Details Modal */}
+            <TaskDetailsModal
+                task={viewingTask}
+                isOpen={!!viewingTask}
+                onClose={() => setViewingTask(null)}
+                users={users}
+                canLinkTasks={true}
+                onViewTask={setViewingTask}
+            />
+
             {/* Delete Project Confirmation */}
             <ConfirmDialog
                 isOpen={!!projectToDelete}
@@ -326,6 +386,22 @@ export const Home = () => {
                 }}
                 title="تأكيد حذف المشروع"
                 message={`هل أنت متأكد من حذف المشروع "${projectToDelete?.name}"؟ لا يمكن التراجع عن هذا الإجراء.`}
+                confirmText="حذف"
+                cancelText="إلغاء"
+            />
+
+            {/* Delete Task Confirmation */}
+            <ConfirmDialog
+                isOpen={!!taskToDelete}
+                onClose={() => setTaskToDelete(null)}
+                onConfirm={() => {
+                    if (taskToDelete) {
+                        deleteTaskMutation.mutate(taskToDelete.id);
+                        setTaskToDelete(null);
+                    }
+                }}
+                title="تأكيد حذف المهمة"
+                message={`هل أنت متأكد من حذف المهمة "${taskToDelete?.title}"؟ لا يمكن التراجع عن هذا الإجراء.`}
                 confirmText="حذف"
                 cancelText="إلغاء"
             />

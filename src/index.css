@@ -532,6 +532,16 @@
   scroll-behavior: auto;
 }
 
+/* Hide scrollbar utility class */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+
 /* Column drop zone highlight */
 [data-rbd-droppable-id].ring-2 {
   animation: pulseRing 0.6s ease-in-out infinite;
