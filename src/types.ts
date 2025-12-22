@@ -195,26 +195,26 @@ export const PRIORITY_CONFIG: Record<TaskPriority, { label: string; color: strin
   very_urgent: {
     label: 'عاجلة جدًا',
     color: '#dc2626', // red-600
-    bgClass: 'bg-rose-600',
-    textClass: 'text-white'
+    bgClass: 'bg-red-100 dark:bg-red-900/30',
+    textClass: 'text-red-700 dark:text-red-400'
   },
   urgent: {
     label: 'عاجلة',
     color: '#f59e0b', // amber-500
-    bgClass: 'bg-amber-500',
-    textClass: 'text-white'
+    bgClass: 'bg-amber-100 dark:bg-amber-900/30',
+    textClass: 'text-amber-700 dark:text-amber-400'
   },
   medium: {
     label: 'متوسطة',
     color: '#a855f7', // purple-500
-    bgClass: 'bg-purple-500',
-    textClass: 'text-white'
+    bgClass: 'bg-purple-100 dark:bg-purple-900/30',
+    textClass: 'text-purple-700 dark:text-purple-400'
   },
   normal: {
     label: 'عادية',
     color: '#22c55e', // green-500
-    bgClass: 'bg-green-500',
-    textClass: 'text-white'
+    bgClass: 'bg-green-100 dark:bg-green-900/30',
+    textClass: 'text-green-700 dark:text-green-400'
   },
 };
 
@@ -264,12 +264,12 @@ export const ROLE_LABELS: Record<UserRole, string> = {
 
 // Status colors mapping
 export const STATUS_COLORS: Record<TaskStatus, string> = {
-  new: 'bg-blue-500',
-  scheduled: 'bg-purple-500',
-  in_progress: 'bg-amber-500',
-  issue: 'bg-rose-600',
-  done: 'bg-green-600',
-  docs: 'bg-gray-500',
+  new: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300',
+  scheduled: 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300',
+  in_progress: 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300',
+  issue: 'bg-rose-100 dark:bg-rose-900/30 text-rose-800 dark:text-rose-300',
+  done: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300',
+  docs: 'bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-300',
 };
 
 // Priority colors mapping (backward compatibility)

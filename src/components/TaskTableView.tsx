@@ -60,25 +60,25 @@ export const TaskTableView: React.FC<TaskTableViewProps> = ({
             <table className="table" aria-label="جدول المهام">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>العنوان</th>
-                        <th>المسؤول</th>
-                        <th>الحالة</th>
-                        <th>الأولوية</th>
-                        <th>تاريخ الاستحقاق</th>
-                        <th>الإجراءات</th>
+                        <th className="min-w-[60px] md:min-w-[80px]">ID</th>
+                        <th className="min-w-[150px] md:min-w-[200px]">العنوان</th>
+                        <th className="min-w-[120px] md:min-w-[180px]">المسؤول</th>
+                        <th className="min-w-[100px] md:min-w-[120px]">الحالة</th>
+                        <th className="min-w-[100px] md:min-w-[120px]">الأولوية</th>
+                        <th className="min-w-[120px] md:min-w-[150px]">تاريخ الاستحقاق</th>
+                        <th className="min-w-[120px] md:min-w-[150px]">الإجراءات</th>
                     </tr>
                 </thead>
                 <tbody>
                     {tasks.map((task) => (
                         <tr key={task.id}>
-                            <td>
+                            <td className="min-w-[60px] md:min-w-[80px]">
                                 <span className="font-mono text-sm">#{task.id}</span>
                             </td>
-                            <td>
+                            <td className="min-w-[150px] md:min-w-[200px]">
                                 <span className="font-semibold">{task.title}</span>
                             </td>
-                            <td>
+                            <td className="min-w-[120px] md:min-w-[180px]">
                                 {task.assignee_id ? (
                                     task.assignee_id === currentUserId ? (
                                         <div className="flex items-center gap-2">
@@ -109,24 +109,24 @@ export const TaskTableView: React.FC<TaskTableViewProps> = ({
                                 )}
                             </td>
 
-                            <td>
+                            <td className="min-w-[100px] md:min-w-[120px]">
                                 <span className={`badge badge-status-${task.status}`}>
                                     {STATUS_LABELS[task.status]}
                                 </span>
                             </td>
-                            <td>
+                            <td className="min-w-[100px] md:min-w-[120px]">
                                 <span
                                     className={`badge ${PRIORITY_CONFIG[task.priority].bgClass} ${PRIORITY_CONFIG[task.priority].textClass}`}
                                 >
                                     {PRIORITY_CONFIG[task.priority].label}
                                 </span>
                             </td>
-                            <td>
+                            <td className="min-w-[120px] md:min-w-[150px]">
                                 <span className="text-sm">
                                     {formatDate(task.due_date)}
                                 </span>
                             </td>
-                            <td>
+                            <td className="min-w-[120px] md:min-w-[150px]">
                                 <div className="flex gap-2 justify-start">
                                     <button
                                         onClick={() => onViewTask(task)}
