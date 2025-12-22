@@ -107,7 +107,7 @@ export const Profile = () => {
                     <h1 className="text-3xl font-bold">ملفي الشخصي</h1>
                     <p className="text-textSecondary dark:text-textSecondary-dark mt-2">معلومات الملف الشخصي والتفاصيل الأساسية</p>
                 </div>
-                {!isEditing && (
+                {/* {!isEditing && (
                     <button
                         onClick={() => setIsEditing(true)}
                         className="btn-primary flex items-center gap-2"
@@ -115,7 +115,7 @@ export const Profile = () => {
                         <Edit2 className="w-4 h-4" />
                         تعديل الملف
                     </button>
-                )}
+                )} */}
             </div>
 
             <form onSubmit={handleSubmit}>

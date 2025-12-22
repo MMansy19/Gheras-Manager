@@ -216,7 +216,7 @@ export const Home = () => {
                         {/* Tabs Container */}
                         <div
                             ref={tabsContainerRef}
-                            className="flex gap-2 overflow-x-auto scrollbar-hide pb-4 px-8"
+                            className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 px-8"
                             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                         >
                             {activeProjects.map((project) => {
