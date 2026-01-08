@@ -11,7 +11,7 @@ import { AlertTriangle, Moon, Sun, Users, BarChart3, LogOut, User, Menu, X, Chev
 export const AppLayout = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { role, setRole } = useRole();
+    const { role } = useRole();
     const { logout } = useAuth();
     const { isDark, toggle } = useDarkMode();
     const [sidebarOpen, setSidebarOpen] = useState(false); // Mobile sidebar state

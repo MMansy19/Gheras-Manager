@@ -9,7 +9,7 @@ import { ShieldCheck, UserCheck, UserCog, Info, Lock } from 'lucide-react';
 export const RoleSelection = () => {
     const navigate = useNavigate();
     const { setRole } = useRole();
-    const { login, isAuthenticated } = useAuth();
+    const { login } = useAuth();
     const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
