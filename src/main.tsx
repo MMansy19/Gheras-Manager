@@ -5,6 +5,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ToastProvider } from './components/ToastProvider';
 import { LoadingSpinner } from './components/LoadingSpinner';
+import { AuthProvider } from './contexts/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import './index.css';
 
 // Lazy load pages for better code splitting
@@ -32,22 +34,28 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
         <ErrorBoundary>
             <QueryClientProvider client={queryClient}>
-                <BrowserRouter>
-                    <Suspense fallback={<LoadingSpinner message="جاري التحميل..." />}>
-                        <Routes>
-                            <Route path="/" element={<Navigate to="/select-role" replace />} />
-                            <Route path="/select-role" element={<RoleSelection />} />
-                            <Route path="/app" element={<AppLayout />}>
-                                <Route index element={<Home />} />
-                                <Route path="project/:projectId" element={<ProjectDashboard />} />
-                                <Route path="profile" element={<Profile />} />
-                                <Route path="users" element={<UsersManagement />} />
-                                <Route path="stats" element={<Statistics />} />
-                            </Route>
-                            <Route path="*" element={<Navigate to="/select-role" replace />} />
-                        </Routes>
-                    </Suspense>
-                </BrowserRouter>
+                <AuthProvider>
+                    <BrowserRouter>
+                        <Suspense fallback={<LoadingSpinner message="جاري التحميل..." />}>
+                            <Routes>
+                                <Route path="/" element={<Navigate to="/select-role" replace />} />
+                                <Route path="/select-role" element={<RoleSelection />} />
+                                <Route path="/app" element={
+                                    <ProtectedRoute>
+                                        <AppLayout />
+                                    </ProtectedRoute>
+                                }>
+                                    <Route index element={<Home />} />
+                                    <Route path="project/:projectId" element={<ProjectDashboard />} />
+                                    <Route path="profile" element={<Profile />} />
+                                    <Route path="users" element={<UsersManagement />} />
+                                    <Route path="stats" element={<Statistics />} />
+                                </Route>
+                                <Route path="*" element={<Navigate to="/select-role" replace />} />
+                            </Routes>
+                        </Suspense>
+                    </BrowserRouter>
+                </AuthProvider>
                 <ToastProvider />
             </QueryClientProvider>
         </ErrorBoundary>

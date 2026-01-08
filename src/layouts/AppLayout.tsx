@@ -2,6 +2,7 @@
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useRole } from '../hooks/useRole';
+import { useAuth } from '../contexts/AuthContext';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useEffect, useState } from 'react';
@@ -11,6 +12,7 @@ export const AppLayout = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { role, setRole } = useRole();
+    const { logout } = useAuth();
     const { isDark, toggle } = useDarkMode();
     const [sidebarOpen, setSidebarOpen] = useState(false); // Mobile sidebar state
 
@@ -54,8 +56,8 @@ export const AppLayout = () => {
     }, []); // Empty dependency array - only run once on mount
 
     const handleLogout = () => {
-        setRole(null);
-        navigate('/');
+        logout();
+        navigate('/select-role', { replace: true });
     };
 
     const isAdminOrSupervisor = role === 'admin' || role === 'supervisor';
