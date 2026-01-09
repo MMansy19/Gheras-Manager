@@ -1,5 +1,7 @@
 import React, { ReactNode } from 'react';
 import { cn } from '../../lib/utils';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { Button } from './button';
 
 // Table Root Component
 interface TableProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -246,6 +248,183 @@ export const TableAvatar: React.FC<TableAvatarProps> = ({
     );
 };
 
+// Table Pagination Component
+interface TablePaginationProps {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+    onPageChange: (page: number) => void;
+    onItemsPerPageChange?: (itemsPerPage: number) => void;
+    className?: string;
+}
+
+export const TablePagination: React.FC<TablePaginationProps> = ({
+    currentPage,
+    totalPages,
+    totalItems,
+    itemsPerPage,
+    onPageChange,
+    onItemsPerPageChange,
+    className
+}) => {
+    const startItem = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+    const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+
+    const handlePrevious = () => {
+        if (currentPage > 1) onPageChange(currentPage - 1);
+    };
+
+    const handleNext = () => {
+        if (currentPage < totalPages) onPageChange(currentPage + 1);
+    };
+
+    const handleFirst = () => {
+        onPageChange(1);
+    };
+
+    const handleLast = () => {
+        onPageChange(totalPages);
+    };
+
+    // Generate page numbers to display
+    const getPageNumbers = () => {
+        const pages: (number | string)[] = [];
+        const maxVisible = 5;
+
+        if (totalPages <= maxVisible) {
+            // Show all pages if total is small
+            for (let i = 1; i <= totalPages; i++) {
+                pages.push(i);
+            }
+        } else {
+            // Always show first page
+            pages.push(1);
+
+            if (currentPage > 3) {
+                pages.push('...');
+            }
+
+            // Show pages around current page
+            const start = Math.max(2, currentPage - 1);
+            const end = Math.min(totalPages - 1, currentPage + 1);
+
+            for (let i = start; i <= end; i++) {
+                pages.push(i);
+            }
+
+            if (currentPage < totalPages - 2) {
+                pages.push('...');
+            }
+
+            // Always show last page
+            if (totalPages > 1) {
+                pages.push(totalPages);
+            }
+        }
+
+        return pages;
+    };
+
+    return (
+        <div className={cn(
+            "flex flex-col sm:flex-row items-center justify-between gap-4 px-4 py-3 border-t border-gray-200 dark:border-gray-700",
+            className
+        )}>
+            {/* Items info and per-page selector */}
+            <div className="flex items-center gap-4 text-sm text-textSecondary dark:text-textSecondary-dark">
+                <span>
+                    عرض {startItem} - {endItem} من {totalItems}
+                </span>
+                {onItemsPerPageChange && (
+                    <div className="flex justify-center items-center gap-2">
+                        <span>عدد الصفوف:</span>
+                        <select
+                            value={itemsPerPage}
+                            onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
+                            className="px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-sm"
+                        >
+                            <option value={5}>5</option>
+                            <option value={10}>10</option>
+                            <option value={20}>20</option>
+                            <option value={50}>50</option>
+                            <option value={100}>100</option>
+                        </select>
+                    </div>
+                )}
+            </div>
+
+            {/* Pagination controls */}
+            <div className="flex items-center gap-2">
+                {/* First page */}
+                <Button
+                    onClick={handleFirst}
+                    disabled={currentPage === 1}
+                    variant="outline"
+                    size="sm"
+                    className="w-8 h-8 p-0"
+                >
+                    <ChevronsRight className="w-4 h-4" />
+                </Button>
+
+                {/* Previous page */}
+                <Button
+                    onClick={handlePrevious}
+                    disabled={currentPage === 1}
+                    variant="outline"
+                    size="sm"
+                    className="w-8 h-8 p-0"
+                >
+                    <ChevronRight className="w-4 h-4" />
+                </Button>
+
+                {/* Page numbers */}
+                <div className="flex items-center gap-1">
+                    {getPageNumbers().map((page, index) => (
+                        page === '...' ? (
+                            <span key={`ellipsis-${index}`} className="px-2 text-textSecondary dark:text-textSecondary-dark">
+                                ...
+                            </span>
+                        ) : (
+                            <Button
+                                key={page}
+                                onClick={() => onPageChange(page as number)}
+                                variant={currentPage === page ? 'default' : 'outline'}
+                                size="sm"
+                                className="w-8 h-8 p-0"
+                            >
+                                {page}
+                            </Button>
+                        )
+                    ))}
+                </div>
+
+                {/* Next page */}
+                <Button
+                    onClick={handleNext}
+                    disabled={currentPage === totalPages}
+                    variant="outline"
+                    size="sm"
+                    className="w-8 h-8 p-0"
+                >
+                    <ChevronLeft className="w-4 h-4" />
+                </Button>
+
+                {/* Last page */}
+                <Button
+                    onClick={handleLast}
+                    disabled={currentPage === totalPages}
+                    variant="outline"
+                    size="sm"
+                    className="w-8 h-8 p-0"
+                >
+                    <ChevronsLeft className="w-4 h-4" />
+                </Button>
+            </div>
+        </div>
+    );
+};
+
 // Export all components as a namespace as well
 export const TableComponents = {
     Root: Table,
@@ -258,4 +437,5 @@ export const TableComponents = {
     Actions: TableActions,
     Badge: TableBadge,
     Avatar: TableAvatar,
+    Pagination: TablePagination,
 };

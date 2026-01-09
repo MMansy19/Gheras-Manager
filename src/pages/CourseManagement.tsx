@@ -25,7 +25,8 @@ import {
     TableRow, 
     TableHead, 
     TableCell,
-    TableBadge
+    TableBadge,
+    TablePagination
 } from '../components/ui/table';
 
 export const CourseManagement = () => {
@@ -47,6 +48,10 @@ export const CourseManagement = () => {
         isOpen: boolean;
         courseId: number | null;
     }>({ isOpen: false, courseId: null });
+    
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
 
     const { data: courses, isLoading: coursesLoading } = useQuery({
         queryKey: ['courses'],
@@ -164,6 +169,22 @@ export const CourseManagement = () => {
             month: 'long',
             day: 'numeric',
         });
+    };
+
+    // Pagination logic
+    const paginatedEnrollments = enrollments 
+        ? enrollments.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+        : [];
+    
+    const totalPages = enrollments ? Math.ceil(enrollments.length / itemsPerPage) : 0;
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
+
+    const handleItemsPerPageChange = (newItemsPerPage: number) => {
+        setItemsPerPage(newItemsPerPage);
+        setCurrentPage(1); // Reset to first page when changing items per page
     };
 
     if (coursesLoading) {
@@ -456,62 +477,72 @@ export const CourseManagement = () => {
                     {enrollmentsLoading ? (
                         <LoadingSpinner message="جاري تحميل البيانات..." />
                     ) : enrollments && enrollments.length > 0 ? (
-                        <Table>
-                            <TableHeader>
-                                <TableRow hoverable={false}>
-                                    <TableHead>الاسم</TableHead>
-                                    <TableHead>البريد الإلكتروني</TableHead>
-                                    <TableHead>تاريخ التسجيل</TableHead>
-                                    <TableHead>الحضور (10 أيام)</TableHead>
-                                    <TableHead align="center">الحالة</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {enrollments.map((enrollment) => (
-                                    <TableRow key={enrollment.id}>
-                                        <TableCell className="font-semibold">{enrollment.full_name}</TableCell>
-                                        <TableCell className="text-sm" dir="ltr">{enrollment.email}</TableCell>
-                                        <TableCell className="text-sm">
-                                            {formatDate(enrollment.created_at || '')}
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex gap-1">
-                                                {Array.from({ length: 10 }, (_, i) => {
-                                                    const day = i + 1;
-                                                    const attended = enrollment.attendance_days.includes(day);
-                                                    return (
-                                                        <div
-                                                            key={day}
-                                                            className={`
-                                                                w-6 h-6 rounded flex items-center justify-center text-xs font-bold
-                                                                ${attended
-                                                                    ? 'bg-green-500 text-white'
-                                                                    : 'bg-gray-200 dark:bg-gray-700 text-gray-400'
-                                                                }
-                                                            `}
-                                                            title={`يوم ${day}`}
-                                                        >
-                                                            {attended ? <Check className="w-3 h-3" /> : day}
-                                                        </div>
-                                                    );
-                                                })}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            {enrollment.is_complete ? (
-                                                <TableBadge variant="success">
-                                                    مكتمل
-                                                </TableBadge>
-                                            ) : (
-                                                <TableBadge variant="info">
-                                                    {enrollment.attendance_count}/10
-                                                </TableBadge>
-                                            )}
-                                        </TableCell>
+                        <>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow hoverable={false}>
+                                        <TableHead>الاسم</TableHead>
+                                        <TableHead>البريد الإلكتروني</TableHead>
+                                        <TableHead>تاريخ التسجيل</TableHead>
+                                        <TableHead>الحضور (10 أيام)</TableHead>
+                                        <TableHead align="center">الحالة</TableHead>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                                </TableHeader>
+                                <TableBody>
+                                    {paginatedEnrollments.map((enrollment) => (
+                                        <TableRow key={enrollment.id}>
+                                            <TableCell className="font-semibold">{enrollment.full_name}</TableCell>
+                                            <TableCell className="text-sm" dir="ltr">{enrollment.email}</TableCell>
+                                            <TableCell className="text-sm">
+                                                {formatDate(enrollment.created_at || '')}
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex gap-1">
+                                                    {Array.from({ length: 10 }, (_, i) => {
+                                                        const day = i + 1;
+                                                        const attended = enrollment.attendance_days.includes(day);
+                                                        return (
+                                                            <div
+                                                                key={day}
+                                                                className={`
+                                                                    w-6 h-6 rounded flex items-center justify-center text-xs font-bold
+                                                                    ${attended
+                                                                        ? 'bg-green-500 text-white'
+                                                                        : 'bg-gray-200 dark:bg-gray-700 text-gray-400'
+                                                                    }
+                                                                `}
+                                                                title={`يوم ${day}`}
+                                                            >
+                                                                {attended ? <Check className="w-3 h-3" /> : day}
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                {enrollment.is_complete ? (
+                                                    <TableBadge variant="success">
+                                                        مكتمل
+                                                    </TableBadge>
+                                                ) : (
+                                                    <TableBadge variant="info">
+                                                        {enrollment.attendance_count}/10
+                                                    </TableBadge>
+                                                )}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                            <TablePagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                totalItems={enrollments.length}
+                                itemsPerPage={itemsPerPage}
+                                onPageChange={handlePageChange}
+                                onItemsPerPageChange={handleItemsPerPageChange}
+                            />
+                        </>
                     ) : (
                         <div className="text-center py-8 text-textSecondary dark:text-textSecondary-dark">
                             <Users className="w-12 h-12 mx-auto mb-2 opacity-50" />

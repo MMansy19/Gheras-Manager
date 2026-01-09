@@ -24,7 +24,8 @@ import {
     TableHead, 
     TableCell,
     TableActions,
-    TableBadge
+    TableBadge,
+    TablePagination
 } from '../components/ui/table';
 
 export const UsersManagement = () => {
@@ -33,6 +34,8 @@ export const UsersManagement = () => {
     const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
     const [filterTeamId, setFilterTeamId] = useState<number | null>(null);
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [itemsPerPage, setItemsPerPage] = useState<number>(10);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [userToDelete, setUserToDelete] = useState<User | null>(null);
@@ -105,6 +108,22 @@ export const UsersManagement = () => {
         }
     );
 
+    // Pagination logic
+    const paginatedUsers = filteredUsers ? filteredUsers.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    ) : [];
+    const totalPages = filteredUsers ? Math.ceil(filteredUsers.length / itemsPerPage) : 0;
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
+
+    const handleItemsPerPageChange = (perPage: number) => {
+        setItemsPerPage(perPage);
+        setCurrentPage(1); // Reset to first page when changing items per page
+    };
+
     if (isLoading) {
         return <LoadingSpinner message="جاري تحميل المستخدمين..." />;
     }
@@ -175,19 +194,20 @@ export const UsersManagement = () => {
 
             {/* Users Table */}
             {filteredUsers && filteredUsers.length > 0 ? (
-                <Table>
-                    <TableHeader>
-                        <TableRow hoverable={false}>
-                            <TableHead>الاسم</TableHead>
-                            <TableHead>البريد الإلكتروني</TableHead>
-                            <TableHead>الدور</TableHead>
-                            <TableHead>الفرق</TableHead>
-                            <TableHead>الحالة</TableHead>
-                            <TableHead>الإجراءات</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {filteredUsers.map((user) => (
+                <>
+                    <Table>
+                        <TableHeader>
+                            <TableRow hoverable={false}>
+                                <TableHead>الاسم</TableHead>
+                                <TableHead>البريد الإلكتروني</TableHead>
+                                <TableHead>الدور</TableHead>
+                                <TableHead>الفرق</TableHead>
+                                <TableHead>الحالة</TableHead>
+                                <TableHead>الإجراءات</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {paginatedUsers.map((user) => (
                             <TableRow key={user.id}>
                                 <TableCell>
                                     <span className="font-semibold">{user.name}</span>
@@ -240,8 +260,17 @@ export const UsersManagement = () => {
                                 </TableCell>
                             </TableRow>
                         ))}
-                    </TableBody>
-                </Table>
+                        </TableBody>
+                    </Table>
+                    <TablePagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalItems={filteredUsers.length}
+                        itemsPerPage={itemsPerPage}
+                        onPageChange={handlePageChange}
+                        onItemsPerPageChange={handleItemsPerPageChange}
+                    />
+                </>
             ) : (
                 <EmptyState
                     icon={<Users className="w-16 h-16 text-gray-400" />}
