@@ -243,9 +243,9 @@ export const CourseRegistrationForm = ({ courseId, onSuccess }: CourseRegistrati
                         value={formData.password}
                         onChange={handleChange}
                         className="pr-10"
-                        placeholder={existingUser ? "أدخل كلمة المرور" : "8 أحرف على الأقل"}
+                        placeholder={existingUser ? "أدخل كلمة المرور" : "6 أحرف على الأقل"}
                         required
-                        minLength={8}
+                        minLength={6}
                         disabled={loading}
                     />
                 </div>

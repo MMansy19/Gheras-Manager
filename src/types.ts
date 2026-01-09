@@ -321,7 +321,7 @@ export type DailyAttendance = z.infer<typeof DailyAttendanceSchema>;
 export const CourseRegistrationSchema = z.object({
   full_name: z.string().min(3, 'الاسم الكامل يجب أن يكون 3 أحرف على الأقل'),
   email: z.string().email('البريد الإلكتروني غير صالح'),
-  password: z.string().min(8, 'كلمة المرور يجب أن تكون 8 أحرف على الأقل'),
+  password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
   confirm_password: z.string(),
 }).refine((data) => data.password === data.confirm_password, {
   message: 'كلمات المرور غير متطابقة',
