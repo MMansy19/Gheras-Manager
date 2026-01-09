@@ -135,7 +135,7 @@ export const generateCertificate = async (fullName: string, templateUrl?: string
         // Position coordinates: adjust these based on your template
         // Y coordinate: 0 = bottom, height = top
         // For A4 landscape (842 x 595 points), middle is ~297
-        const fontSize = 42;
+        const fontSize = 32;
         
         // Reshape Arabic text for proper display
         const processedName = reshapeArabic(fullName);
@@ -143,8 +143,8 @@ export const generateCertificate = async (fullName: string, templateUrl?: string
         
         // Position: center horizontally, adjust Y based on your template
         // Change this Y value to match your certificate design
-        const xPosition = width / 2 - textWidth / 2 - 20; // Adjust this number left/right as needed
-        const yPosition = height / 2 - 50; // Adjust this number up/down as needed
+        const xPosition = width / 2 - textWidth / 2 - 10; // Adjust this number left/right as needed
+        const yPosition = height / 2 ; // Adjust this number up/down as needed
         
         firstPage.drawText(processedName, {
             x: xPosition,
