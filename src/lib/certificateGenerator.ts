@@ -1,141 +1,302 @@
-import jsPDF from 'jspdf';
-import { processArabicText } from './arabicTextHelper';
-import { addCairoFont } from './cairoFont';
+import html2pdf from 'html2pdf.js';
 
 /**
  * Generate and download a certificate PDF for course completion
+ * Uses HTML → PDF approach for perfect Arabic rendering
  * @param fullName - Student's full name in Arabic
  */
 export const generateCertificate = async (fullName: string): Promise<void> => {
     try {
-        // Create new PDF document (A4 landscape)
-        const pdf = new jsPDF({
-            orientation: 'landscape',
-            unit: 'mm',
-            format: 'a4',
-        });
-
-        // Load Arabic font support
-        await addCairoFont(pdf);
-
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-
-        // Background color - Primary brand color
-        pdf.setFillColor(236, 253, 245); // #ecfdf5 - primary-50
-        pdf.rect(0, 0, pageWidth, pageHeight, 'F');
-
-        // Border frame
-        pdf.setDrawColor(5, 150, 105); // #059669 - primary
-        pdf.setLineWidth(2);
-        pdf.rect(10, 10, pageWidth - 20, pageHeight - 20);
-
-        // Inner decorative border
-        pdf.setLineWidth(0.5);
-        pdf.rect(15, 15, pageWidth - 30, pageHeight - 30);
-
-        // Add logo at the top center
-        try {
-            const logoImg = new Image();
-            logoImg.src = '/logo.png';
-            await new Promise((resolve, reject) => {
-                logoImg.onload = resolve;
-                logoImg.onerror = reject;
-            });
-            
-            // Add logo (25mm width, maintain aspect ratio)
-            const logoWidth = 25;
-            const logoHeight = 25; // Adjust based on your logo's aspect ratio
-            pdf.addImage(logoImg, 'PNG', (pageWidth - logoWidth) / 2, 20, logoWidth, logoHeight);
-        } catch (error) {
-            console.error('Error loading logo:', error);
-            // Continue without logo if it fails to load
-        }
-
-        // Title - "شهادة إتمام" (moved down to accommodate logo)
-        pdf.setTextColor(5, 150, 105); // primary color
-        pdf.setFontSize(32);
-        pdf.text('Certificate of Completion', pageWidth / 2, 55, { align: 'center' });
-
-        pdf.setFontSize(28);
-        const titleAr = processArabicText('شهادة إتمام');
-        pdf.text(titleAr, pageWidth / 2, 65, { align: 'center' });
-
-        // Decorative line
-        pdf.setDrawColor(5, 150, 105);
-        pdf.setLineWidth(0.5);
-        pdf.line(pageWidth / 2 - 40, 70, pageWidth / 2 + 40, 70);
-
-        // "This is to certify that" text
-        pdf.setTextColor(71, 85, 105); // gray-600
-        pdf.setFontSize(16);
-        const certifyText = processArabicText('هذا يشهد بأن');
-        pdf.text(certifyText, pageWidth / 2, 85, { align: 'center' });
-
-        // Student name (highlighted)
-        pdf.setTextColor(5, 150, 105); // primary
-        pdf.setFontSize(24);
-        const processedName = processArabicText(fullName);
-        pdf.text(processedName, pageWidth / 2, 100, { align: 'center' });
-
-        // Description
-        pdf.setTextColor(51, 65, 85); // slate-700
-        pdf.setFontSize(16);
-        const completedText = processArabicText('قد أكمل بنجاح');
-        pdf.text(completedText, pageWidth / 2, 115, { align: 'center' });
-
-        // Course name
-        pdf.setFontSize(20);
-        pdf.setTextColor(5, 150, 105);
-        const courseName = processArabicText('دورة غراس لمدة 10 أيام');
-        pdf.text(courseName, pageWidth / 2, 130, { align: 'center' });
-
-        // Organization
-        pdf.setFontSize(16);
-        pdf.setTextColor(71, 85, 105);
-        const orgName = processArabicText('أكاديمية غراس للعلم');
-        pdf.text(orgName, pageWidth / 2, 145, { align: 'center' });
-
-        // Attendance note
-        pdf.setFontSize(14);
-        const attendanceNote = processArabicText('بحضور كامل لجميع الأيام العشرة');
-        pdf.text(attendanceNote, pageWidth / 2, 155, { align: 'center' });
-
-        // Date
+        // Get current date in Arabic
         const currentDate = new Date().toLocaleDateString('ar-SA', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
         });
-        pdf.setFontSize(12);
-        pdf.setTextColor(100, 116, 139); // slate-500
-        const dateText = processArabicText(`تاريخ الإصدار: ${currentDate}`);
-        pdf.text(dateText, pageWidth / 2, 165, { align: 'center' });
 
-        // Signature area
-        pdf.setLineWidth(0.3);
-        pdf.line(40, 180, 90, 180); // Signature line
-        pdf.setFontSize(10);
-        const signatureLabel = processArabicText('التوقيع');
-        pdf.text(signatureLabel, 65, 186, { align: 'center' });
+        // Create HTML certificate with proper RTL and Arabic fonts
+        const certificateHTML = `
+            <!DOCTYPE html>
+            <html dir="rtl" lang="ar">
+            <head>
+                <meta charset="UTF-8">
+                <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+                <style>
+                    * {
+                        margin: 0;
+                        padding: 0;
+                        box-sizing: border-box;
+                    }
+                    
+                    body {
+                        font-family: 'Cairo', Arial, sans-serif;
+                        direction: rtl;
+                        width: 297mm;
+                        height: 210mm;
+                        background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 0;
+                        margin: 0;
+                    }
+                    
+                    .certificate {
+                        width: 277mm;
+                        height: 190mm;
+                        background: white;
+                        border: 8px solid #059669;
+                        position: relative;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        padding: 40px;
+                        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+                    }
+                    
+                    .certificate::before {
+                        content: '';
+                        position: absolute;
+                        top: 15px;
+                        left: 15px;
+                        right: 15px;
+                        bottom: 15px;
+                        border: 2px solid #059669;
+                        pointer-events: none;
+                    }
+                    
+                    .logo {
+                        width: 80px;
+                        height: 80px;
+                        margin-bottom: 20px;
+                        position: relative;
+                        z-index: 1;
+                    }
+                    
+                    .title-en {
+                        font-size: 36px;
+                        font-weight: 700;
+                        color: #059669;
+                        margin-bottom: 10px;
+                        font-family: Arial, sans-serif;
+                        direction: ltr;
+                        text-align: center;
+                    }
+                    
+                    .title-ar {
+                        font-size: 42px;
+                        font-weight: 700;
+                        color: #059669;
+                        margin-bottom: 15px;
+                        text-align: center;
+                    }
+                    
+                    .divider {
+                        width: 200px;
+                        height: 3px;
+                        background: linear-gradient(90deg, transparent, #059669, transparent);
+                        margin: 20px 0;
+                    }
+                    
+                    .certify-text {
+                        font-size: 22px;
+                        color: #475569;
+                        margin-bottom: 15px;
+                        text-align: center;
+                    }
+                    
+                    .student-name {
+                        font-size: 38px;
+                        font-weight: 700;
+                        color: #059669;
+                        margin: 20px 0;
+                        text-align: center;
+                        text-decoration: underline;
+                        text-decoration-color: #059669;
+                        text-underline-offset: 8px;
+                    }
+                    
+                    .description {
+                        font-size: 24px;
+                        color: #334155;
+                        margin: 15px 0;
+                        text-align: center;
+                        font-weight: 600;
+                    }
+                    
+                    .course-name {
+                        font-size: 28px;
+                        font-weight: 700;
+                        color: #059669;
+                        margin: 15px 0;
+                        text-align: center;
+                    }
+                    
+                    .organization {
+                        font-size: 22px;
+                        color: #475569;
+                        margin: 10px 0;
+                        text-align: center;
+                        font-weight: 600;
+                    }
+                    
+                    .attendance-note {
+                        font-size: 18px;
+                        color: #64748b;
+                        margin: 10px 0;
+                        text-align: center;
+                    }
+                    
+                    .date {
+                        font-size: 16px;
+                        color: #64748b;
+                        margin-top: 20px;
+                        text-align: center;
+                    }
+                    
+                    .signature-section {
+                        position: absolute;
+                        bottom: 40px;
+                        right: 60px;
+                        text-align: center;
+                    }
+                    
+                    .signature-line {
+                        width: 150px;
+                        height: 2px;
+                        background: #059669;
+                        margin-bottom: 8px;
+                    }
+                    
+                    .signature-label {
+                        font-size: 14px;
+                        color: #64748b;
+                    }
+                    
+                    .seal {
+                        position: absolute;
+                        bottom: 30px;
+                        left: 50px;
+                        width: 80px;
+                        height: 80px;
+                        background: #059669;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-size: 20px;
+                        font-weight: 700;
+                        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
+                    }
+                    
+                    .footer {
+                        position: absolute;
+                        bottom: 15px;
+                        text-align: center;
+                        width: 100%;
+                        font-size: 12px;
+                        color: #94a3b8;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="certificate">
+                    <img src="/logo.png" alt="شعار غراس" class="logo">
+                    
+                    <div class="title-en">Certificate of Completion</div>
+                    <div class="title-ar">شهادة إتمام</div>
+                    
+                    <div class="divider"></div>
+                    
+                    <div class="certify-text">هذا يشهد بأن</div>
+                    
+                    <div class="student-name">${fullName}</div>
+                    
+                    <div class="description">قد أكمل بنجاح</div>
+                    
+                    <div class="course-name">دورة غراس لمدة 10 أيام</div>
+                    
+                    <div class="organization">أكاديمية غراس للعلم</div>
+                    
+                    <div class="attendance-note">بحضور كامل لجميع الأيام العشرة</div>
+                    
+                    <div class="date">تاريخ الإصدار: ${currentDate}</div>
+                    
+                    <div class="signature-section">
+                        <div class="signature-line"></div>
+                        <div class="signature-label">التوقيع</div>
+                    </div>
+                    
+                    <div class="seal">غراس</div>
+                    
+                    <div class="footer">www.ghras.academy</div>
+                </div>
+            </body>
+            </html>
+        `;
 
-        // Seal/Badge placeholder (circle)
-        pdf.setFillColor(5, 150, 105);
-        pdf.circle(pageWidth - 40, pageHeight - 40, 15, 'F');
-        pdf.setTextColor(255, 255, 255);
-        pdf.setFontSize(10);
-        const sealText = processArabicText('غراس');
-        pdf.text(sealText, pageWidth - 40, pageHeight - 38, { align: 'center' });
+        // Create a temporary container with proper dimensions
+        const container = document.createElement('div');
+        container.style.position = 'fixed';
+        container.style.top = '-10000px';
+        container.style.left = '0';
+        container.style.width = '1122px'; // A4 landscape width at 96 DPI
+        container.style.height = '793px'; // A4 landscape height at 96 DPI
+        container.innerHTML = certificateHTML;
+        document.body.appendChild(container);
 
-        // Footer
-        pdf.setTextColor(148, 163, 184); // slate-400
-        pdf.setFontSize(8);
-        pdf.text('www.ghras.academy', pageWidth / 2, pageHeight - 15, { align: 'center' });
+        // Wait for images and fonts to load
+        const logo = container.querySelector('.logo') as HTMLImageElement;
+        if (logo) {
+            await new Promise((resolve) => {
+                if (logo.complete) {
+                    resolve(null);
+                } else {
+                    logo.onload = () => resolve(null);
+                    logo.onerror = () => resolve(null); // Continue even if logo fails
+                }
+            });
+        }
 
-        // Download the PDF
-        const processedFileName = processArabicText(fullName.replace(/\s+/g, '_'));
-        const fileName = `Ghras_Certificate_${processedFileName}_${Date.now()}.pdf`;
-        pdf.save(fileName);
+        // Wait for fonts to load (Cairo from Google Fonts)
+        if (document.fonts) {
+            await document.fonts.ready;
+        }
+        
+        // Additional delay to ensure everything is rendered
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Configure html2pdf options
+        const opt = {
+            margin: 0,
+            filename: `شهادة_غراس_${fullName.replace(/\s+/g, '_')}_${Date.now()}.pdf`,
+            image: { type: 'jpeg' as const, quality: 1 },
+            html2canvas: { 
+                scale: 2,
+                useCORS: true,
+                logging: true,
+                letterRendering: true,
+                allowTaint: true
+            },
+            jsPDF: { 
+                unit: 'mm', 
+                format: 'a4', 
+                orientation: 'landscape' as const,
+                compress: true
+            }
+        };
+
+        // Generate PDF from the certificate element
+        const certificateElement = container.querySelector('.certificate') as HTMLElement;
+        if (certificateElement) {
+            await html2pdf().set(opt).from(certificateElement).save();
+        } else {
+            throw new Error('Failed to find certificate element');
+        }
+
+        // Cleanup
+        document.body.removeChild(container);
     } catch (error) {
         console.error('Error generating certificate:', error);
         throw new Error('فشل في توليد الشهادة');
@@ -143,21 +304,245 @@ export const generateCertificate = async (fullName: string): Promise<void> => {
 };
 
 /**
- * Preview certificate (opens in new tab instead of downloading)
+ * Preview certificate as HTML in a new window
+ * @param fullName - Student's full name in Arabic
  */
-export const previewCertificate = async (_fullName: string): Promise<void> => {
+export const previewCertificate = (fullName: string): void => {
     try {
-        const pdf = new jsPDF({
-            orientation: 'landscape',
-            unit: 'mm',
-            format: 'a4',
+        const currentDate = new Date().toLocaleDateString('ar-SA', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
         });
 
-        // Same generation logic as above...
-        // (Simplified for preview)
+        const certificateHTML = `
+            <!DOCTYPE html>
+            <html dir="rtl" lang="ar">
+            <head>
+                <meta charset="UTF-8">
+                <title>معاينة الشهادة - ${fullName}</title>
+                <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+                <style>
+                    * {
+                        margin: 0;
+                        padding: 0;
+                        box-sizing: border-box;
+                    }
+                    
+                    body {
+                        font-family: 'Cairo', Arial, sans-serif;
+                        direction: rtl;
+                        width: 100vw;
+                        height: 100vh;
+                        background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 20px;
+                        margin: 0;
+                    }
+                    
+                    .certificate {
+                        width: 1050px;
+                        height: 750px;
+                        background: white;
+                        border: 8px solid #059669;
+                        position: relative;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        padding: 40px;
+                        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+                    }
+                    
+                    .certificate::before {
+                        content: '';
+                        position: absolute;
+                        top: 15px;
+                        left: 15px;
+                        right: 15px;
+                        bottom: 15px;
+                        border: 2px solid #059669;
+                        pointer-events: none;
+                    }
+                    
+                    .logo {
+                        width: 80px;
+                        height: 80px;
+                        margin-bottom: 20px;
+                        position: relative;
+                        z-index: 1;
+                    }
+                    
+                    .title-en {
+                        font-size: 36px;
+                        font-weight: 700;
+                        color: #059669;
+                        margin-bottom: 10px;
+                        font-family: Arial, sans-serif;
+                        direction: ltr;
+                        text-align: center;
+                    }
+                    
+                    .title-ar {
+                        font-size: 42px;
+                        font-weight: 700;
+                        color: #059669;
+                        margin-bottom: 15px;
+                        text-align: center;
+                    }
+                    
+                    .divider {
+                        width: 200px;
+                        height: 3px;
+                        background: linear-gradient(90deg, transparent, #059669, transparent);
+                        margin: 20px 0;
+                    }
+                    
+                    .certify-text {
+                        font-size: 22px;
+                        color: #475569;
+                        margin-bottom: 15px;
+                        text-align: center;
+                    }
+                    
+                    .student-name {
+                        font-size: 38px;
+                        font-weight: 700;
+                        color: #059669;
+                        margin: 20px 0;
+                        text-align: center;
+                        text-decoration: underline;
+                        text-decoration-color: #059669;
+                        text-underline-offset: 8px;
+                    }
+                    
+                    .description {
+                        font-size: 24px;
+                        color: #334155;
+                        margin: 15px 0;
+                        text-align: center;
+                        font-weight: 600;
+                    }
+                    
+                    .course-name {
+                        font-size: 28px;
+                        font-weight: 700;
+                        color: #059669;
+                        margin: 15px 0;
+                        text-align: center;
+                    }
+                    
+                    .organization {
+                        font-size: 22px;
+                        color: #475569;
+                        margin: 10px 0;
+                        text-align: center;
+                        font-weight: 600;
+                    }
+                    
+                    .attendance-note {
+                        font-size: 18px;
+                        color: #64748b;
+                        margin: 10px 0;
+                        text-align: center;
+                    }
+                    
+                    .date {
+                        font-size: 16px;
+                        color: #64748b;
+                        margin-top: 20px;
+                        text-align: center;
+                    }
+                    
+                    .signature-section {
+                        position: absolute;
+                        bottom: 40px;
+                        right: 60px;
+                        text-align: center;
+                    }
+                    
+                    .signature-line {
+                        width: 150px;
+                        height: 2px;
+                        background: #059669;
+                        margin-bottom: 8px;
+                    }
+                    
+                    .signature-label {
+                        font-size: 14px;
+                        color: #64748b;
+                    }
+                    
+                    .seal {
+                        position: absolute;
+                        bottom: 30px;
+                        left: 50px;
+                        width: 80px;
+                        height: 80px;
+                        background: #059669;
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-size: 20px;
+                        font-weight: 700;
+                        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
+                    }
+                    
+                    .footer {
+                        position: absolute;
+                        bottom: 15px;
+                        text-align: center;
+                        width: 100%;
+                        font-size: 12px;
+                        color: #94a3b8;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="certificate">
+                    <img src="/logo.png" alt="شعار غراس" class="logo">
+                    
+                    <div class="title-en">Certificate of Completion</div>
+                    <div class="title-ar">شهادة إتمام</div>
+                    
+                    <div class="divider"></div>
+                    
+                    <div class="certify-text">هذا يشهد بأن</div>
+                    
+                    <div class="student-name">${fullName}</div>
+                    
+                    <div class="description">قد أكمل بنجاح</div>
+                    
+                    <div class="course-name">دورة غراس لمدة 10 أيام</div>
+                    
+                    <div class="organization">أكاديمية غراس للعلم</div>
+                    
+                    <div class="attendance-note">بحضور كامل لجميع الأيام العشرة</div>
+                    
+                    <div class="date">تاريخ الإصدار: ${currentDate}</div>
+                    
+                    <div class="signature-section">
+                        <div class="signature-line"></div>
+                        <div class="signature-label">التوقيع</div>
+                    </div>
+                    
+                    <div class="seal">غراس</div>
+                    
+                    <div class="footer">www.ghras.academy</div>
+                </div>
+            </body>
+            </html>
+        `;
 
-        // Open in new tab
-        window.open(pdf.output('bloburl'), '_blank');
+        // Open in new window
+        const previewWindow = window.open('', '_blank');
+        if (previewWindow) {
+            previewWindow.document.write(certificateHTML);
+            previewWindow.document.close();
+        }
     } catch (error) {
         console.error('Error previewing certificate:', error);
         throw new Error('فشل في معاينة الشهادة');

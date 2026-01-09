@@ -24,6 +24,7 @@
     "clsx": "^2.1.0",
     "date-fns": "^3.0.6",
     "html2canvas": "^1.4.1",
+    "html2pdf.js": "^0.13.0",
     "jspdf": "^4.0.0",
     "lucide-react": "^0.294.0",
     "luxon": "^3.4.4",
