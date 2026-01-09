@@ -8,6 +8,16 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchTaskLinks } from '../api/projectApi';
 import { fetchTasks } from '../api/mockApi';
+import { 
+    Table, 
+    TableHeader, 
+    TableBody, 
+    TableRow, 
+    TableHead, 
+    TableCell,
+    TableAvatar,
+    TableBadge
+} from './ui/table';
 
 interface TaskTableViewProps {
     tasks: Task[];
@@ -79,95 +89,79 @@ export const TaskTableView: React.FC<TaskTableViewProps> = ({
     }
 
     return (
-        <div className="card overflow-x-auto">
-            <table className="table" aria-label="جدول المهام">
-                <thead>
-                    <tr>
-                        <th className="min-w-[60px] md:min-w-[80px]">ID</th>
-                        <th className="min-w-[150px] md:min-w-[200px]">العنوان</th>
-                        <th className="min-w-[120px] md:min-w-[180px]">المسؤول</th>
-                        <th className="min-w-[100px] md:min-w-[120px]">الحالة</th>
-                        <th className="min-w-[100px] md:min-w-[120px]">الأولوية</th>
-                        <th className="min-w-[120px] md:min-w-[150px]">تاريخ الاستحقاق</th>
-                        <th className="min-w-[120px] md:min-w-[150px]">الإجراءات</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {tasks.map((task) => (
-                        <tr
-                            key={task.id}
-                            onClick={() => onViewTask(task)}
-                            className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
-                        >
-                            <td className="min-w-[60px] md:min-w-[80px]">
-                                <span className="font-mono text-sm">#{task.id}</span>
-                            </td>
-                            <td className="min-w-[150px] md:min-w-[200px]">
-                                <span className="font-semibold">{task.title}</span>
-                            </td>
-                            <td className="min-w-[120px] md:min-w-[180px]">
-                                {task.assignee_id ? (
-                                    task.assignee_id === currentUserId ? (
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
-                                                {getUserName(task.assignee_id).charAt(0)}
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <span className="text-sm font-semibold text-primary">
-                                                    {getUserName(task.assignee_id)}
-                                                </span>
-                                                <span className="text-xs text-primary/70">
-                                                    (أنت)
-                                                </span>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 font-bold text-sm">
-                                                {getUserName(task.assignee_id).charAt(0)}
-                                            </div>
-                                            <span className="text-sm">
-                                                {getUserName(task.assignee_id)}
-                                            </span>
-                                        </div>
-                                    )
+        <Table>
+            <TableHeader>
+                <TableRow hoverable={false}>
+                    <TableHead className="min-w-[60px] md:min-w-[80px]">ID</TableHead>
+                    <TableHead className="min-w-[150px] md:min-w-[200px]">العنوان</TableHead>
+                    <TableHead className="min-w-[120px] md:min-w-[180px]">المسؤول</TableHead>
+                    <TableHead className="min-w-[100px] md:min-w-[120px]">الحالة</TableHead>
+                    <TableHead className="min-w-[100px] md:min-w-[120px]">الأولوية</TableHead>
+                    <TableHead className="min-w-[120px] md:min-w-[150px]">تاريخ الاستحقاق</TableHead>
+                    <TableHead className="min-w-[120px] md:min-w-[150px]">الإجراءات</TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                {tasks.map((task) => (
+                    <TableRow
+                        key={task.id}
+                        onClick={() => onViewTask(task)}
+                        clickable
+                    >
+                        <TableCell className="min-w-[60px] md:min-w-[80px]">
+                            <span className="font-mono text-sm">#{task.id}</span>
+                        </TableCell>
+                        <TableCell className="min-w-[150px] md:min-w-[200px]">
+                            <span className="font-semibold">{task.title}</span>
+                        </TableCell>
+                        <TableCell className="min-w-[120px] md:min-w-[180px]">
+                            {task.assignee_id ? (
+                                task.assignee_id === currentUserId ? (
+                                    <TableAvatar 
+                                        name={getUserName(task.assignee_id)} 
+                                        highlight 
+                                    />
                                 ) : (
-                                    <span className="text-sm text-gray-400">غير مُعين</span>
-                                )}
-                            </td>
+                                    <TableAvatar 
+                                        name={getUserName(task.assignee_id)} 
+                                    />
+                                )
+                            ) : (
+                                <span className="text-sm text-gray-400">غير مُعين</span>
+                            )}
+                        </TableCell>
 
-                            <td className="min-w-[100px] md:min-w-[120px]">
-                                <span className={`badge badge-status-${task.status}`}>
-                                    {STATUS_LABELS[task.status]}
-                                </span>
-                            </td>
-                            <td className="min-w-[100px] md:min-w-[120px]">
-                                <span
-                                    className={`badge ${PRIORITY_CONFIG[task.priority].bgClass} ${PRIORITY_CONFIG[task.priority].textClass}`}
+                        <TableCell className="min-w-[100px] md:min-w-[120px]">
+                            <span className={`badge badge-status-${task.status}`}>
+                                {STATUS_LABELS[task.status]}
+                            </span>
+                        </TableCell>
+                        <TableCell className="min-w-[100px] md:min-w-[120px]">
+                            <span
+                                className={`badge ${PRIORITY_CONFIG[task.priority].bgClass} ${PRIORITY_CONFIG[task.priority].textClass}`}
+                            >
+                                {PRIORITY_CONFIG[task.priority].label}
+                            </span>
+                        </TableCell>
+                        <TableCell className="min-w-[120px] md:min-w-[150px]">
+                            <span className="text-sm">
+                                {formatDate(task.due_date)}
+                            </span>
+                        </TableCell>
+                        <TableCell className="min-w-[120px] md:min-w-[150px]">
+                            <div className="relative" onClick={(e) => e.stopPropagation()}>
+                                <button
+                                    onClick={(e) => handleMenuToggle(task.id, e)}
+                                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+                                    title="الإجراءات"
                                 >
-                                    {PRIORITY_CONFIG[task.priority].label}
-                                </span>
-                            </td>
-                            <td className="min-w-[120px] md:min-w-[150px]">
-                                <span className="text-sm">
-                                    {formatDate(task.due_date)}
-                                </span>
-                            </td>
-                            <td className="min-w-[120px] md:min-w-[150px]">
-                                <div className="relative" onClick={(e) => e.stopPropagation()}>
-                                    <button
-                                        onClick={(e) => handleMenuToggle(task.id, e)}
-                                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
-                                        title="الإجراءات"
-                                    >
-                                        <MoreHorizontal className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+                                    <MoreHorizontal className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </TableCell>
+                    </TableRow>
+                ))}
+            </TableBody>
 
             {/* Global Dropdown Menu Overlay */}
             {openMenuId !== null && menuPosition && (
@@ -238,7 +232,7 @@ export const TaskTableView: React.FC<TaskTableViewProps> = ({
                     </div>
                 </>
             )}
-        </div>
+        </Table>
     );
 };
 
@@ -399,12 +393,12 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
                                                 {linkedTask!.description || 'لا يوجد وصف'}
                                             </p>
                                             <div className="flex gap-2 mt-1">
-                                                <span className={`badge badge-status-${linkedTask!.status} text-xs`}>
+                                                <TableBadge variant={linkedTask!.status === 'done' ? 'success' : linkedTask!.status === 'in_progress' ? 'info' : 'default'}>
                                                     {STATUS_LABELS[linkedTask!.status]}
-                                                </span>
-                                                <span className={`badge text-xs ${PRIORITY_CONFIG[linkedTask!.priority].bgClass} ${PRIORITY_CONFIG[linkedTask!.priority].textClass}`}>
+                                                </TableBadge>
+                                                <TableBadge variant={linkedTask!.priority === 'very_urgent' || linkedTask!.priority === 'urgent' ? 'danger' : linkedTask!.priority === 'medium' ? 'warning' : 'default'}>
                                                     {PRIORITY_CONFIG[linkedTask!.priority].label}
-                                                </span>
+                                                </TableBadge>
                                             </div>
                                         </div>
                                         <Eye className="w-4 h-4 text-gray-400 flex-shrink-0" />

@@ -16,6 +16,16 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Button } from '../components/ui/button';
+import { 
+    Table, 
+    TableHeader, 
+    TableBody, 
+    TableRow, 
+    TableHead, 
+    TableCell,
+    TableActions,
+    TableBadge
+} from '../components/ui/table';
 
 export const UsersManagement = () => {
     const { role } = useRole();
@@ -164,83 +174,81 @@ export const UsersManagement = () => {
             </div>
 
             {/* Users Table */}
-            <div className="card overflow-x-auto">
-                {filteredUsers && filteredUsers.length > 0 ? (
-                    <table className="table" aria-label="جدول المستخدمين">
-                        <thead>
-                            <tr>
-                                <th>الاسم</th>
-                                <th>البريد الإلكتروني</th>
-                                <th>الدور</th>
-                                <th>الفرق</th>
-                                <th>الحالة</th>
-                                <th>الإجراءات</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredUsers.map((user) => (
-                                <tr key={user.id}>
-                                    <td>
-                                        <span className="font-semibold">{user.name}</span>
-                                    </td>
-                                    <td>
-                                        <span className="text-sm text-textSecondary dark:text-textSecondary-dark">
-                                            {user.email}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span className="font-medium">{ROLE_LABELS[user.role]}</span>
-                                    </td>
-                                    <td>
-                                        <div className="flex gap-1 flex-wrap justify-start">
-                                            {user.teams.map((teamId) => (
-                                                <span key={teamId} className="badge bg-primary/20 text-primary">
-                                                    {teamId}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    </td>
-                                    <td>
+            {filteredUsers && filteredUsers.length > 0 ? (
+                <Table>
+                    <TableHeader>
+                        <TableRow hoverable={false}>
+                            <TableHead>الاسم</TableHead>
+                            <TableHead>البريد الإلكتروني</TableHead>
+                            <TableHead>الدور</TableHead>
+                            <TableHead>الفرق</TableHead>
+                            <TableHead>الحالة</TableHead>
+                            <TableHead>الإجراءات</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {filteredUsers.map((user) => (
+                            <TableRow key={user.id}>
+                                <TableCell>
+                                    <span className="font-semibold">{user.name}</span>
+                                </TableCell>
+                                <TableCell>
+                                    <span className="text-sm text-textSecondary dark:text-textSecondary-dark">
+                                        {user.email}
+                                    </span>
+                                </TableCell>
+                                <TableCell>
+                                    <span className="font-medium">{ROLE_LABELS[user.role]}</span>
+                                </TableCell>
+                                <TableCell>
+                                    <div className="flex gap-1 flex-wrap justify-start">
+                                        {user.teams.map((teamId) => (
+                                            <TableBadge key={teamId} variant="primary">
+                                                {teamId}
+                                            </TableBadge>
+                                        ))}
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    <button
+                                        onClick={() => toggleUserStatus(user)}
+                                        className={`badge ${user.status
+                                            ? 'badge-status-done'
+                                            : 'badge-status-issue'
+                                            }`}
+                                    >
+                                        {user.status ? 'نشط' : 'معطل'}
+                                    </button>
+                                </TableCell>
+                                <TableCell>
+                                    <TableActions>
                                         <button
-                                            onClick={() => toggleUserStatus(user)}
-                                            className={`badge ${user.status
-                                                ? 'badge-status-done'
-                                                : 'badge-status-issue'
-                                                }`}
+                                            onClick={() => setEditingUser(user)}
+                                            className="text-sm btn-secondary py-1 px-2 flex items-center gap-1"
                                         >
-                                            {user.status ? 'نشط' : 'معطل'}
+                                            <Edit2 className="w-3 h-3" />
+                                            تعديل
                                         </button>
-                                    </td>
-                                    <td>
-                                        <div className="flex gap-2 justify-start">
-                                            <button
-                                                onClick={() => setEditingUser(user)}
-                                                className="text-sm btn-secondary py-1 px-2 flex items-center gap-1"
-                                            >
-                                                <Edit2 className="w-3 h-3" />
-                                                تعديل
-                                            </button>
-                                            <button
-                                                onClick={() => setUserToDelete(user)}
-                                                className="text-sm bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 py-1 px-2 rounded-md flex items-center gap-1 transition-colors"
-                                            >
-                                                <Trash2 className="w-3 h-3" />
-                                                حذف
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                ) : (
-                    <EmptyState
-                        icon={<Users className="w-16 h-16 text-gray-400" />}
-                        title="لا يوجد مستخدمون"
-                        description="لم يتم العثور على مستخدمين. جرب البحث بكلمات أخرى."
-                    />
-                )}
-            </div>
+                                        <button
+                                            onClick={() => setUserToDelete(user)}
+                                            className="text-sm bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 py-1 px-2 rounded-md flex items-center gap-1 transition-colors"
+                                        >
+                                            <Trash2 className="w-3 h-3" />
+                                            حذف
+                                        </button>
+                                    </TableActions>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            ) : (
+                <EmptyState
+                    icon={<Users className="w-16 h-16 text-gray-400" />}
+                    title="لا يوجد مستخدمون"
+                    description="لم يتم العثور على مستخدمين. جرب البحث بكلمات أخرى."
+                />
+            )}
 
             {/* Create/Edit User Modal */}
             <UserFormModal

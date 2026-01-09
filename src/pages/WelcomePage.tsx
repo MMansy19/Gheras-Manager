@@ -70,11 +70,18 @@ export const WelcomePage = () => {
     };
 
     const handleDownloadCertificate = async () => {
-        if (!certificateData) return;
+        if (!certificateData || !selectedCourse) return;
 
         try {
             setDownloadingCert(true);
-            await generateCertificate(certificateData.fullName);
+            // Template URL is required from storage
+            const templateUrl = selectedCourse.certificate_template_url;
+            if (!templateUrl) {
+                setErrorMessage('لم يتم تحميل قالب شهادة لهذه الدورة. يرجى التواصل مع الإدارة.');
+                setShowErrorDialog(true);
+                return;
+            }
+            await generateCertificate(certificateData.fullName, templateUrl);
         } catch (err) {
             console.error('Error generating certificate:', err);
             setErrorMessage('حدث خطأ في توليد الشهادة. يرجى المحاولة مرة أخرى.');

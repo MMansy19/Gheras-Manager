@@ -95,14 +95,22 @@ const reshapeArabic = (text: string): string => {
 
 /**
  * Generate and download a certificate PDF for course completion
- * Uses existing PDF template and adds student name
+ * Uses existing PDF template from storage and adds student name
  * @param fullName - Student's full name in Arabic
+ * @param templateUrl - URL to the certificate template PDF from Supabase Storage (required)
  */
-export const generateCertificate = async (fullName: string): Promise<void> => {
+export const generateCertificate = async (fullName: string, templateUrl?: string): Promise<void> => {
     try {
-        // Load the PDF template
-        const templateUrl = '/certificate.pdf';
-        const existingPdfBytes = await fetch(templateUrl).then(res => res.arrayBuffer());
+        // Template URL is required - must be from storage
+        if (!templateUrl) {
+            throw new Error('لم يتم تحميل قالب شهادة لهذه الدورة. يرجى التواصل مع الإدارة.');
+        }
+        
+        // Load the PDF template from storage
+        const existingPdfBytes = await fetch(templateUrl).then(res => {
+            if (!res.ok) throw new Error(`Failed to load certificate template from ${templateUrl}`);
+            return res.arrayBuffer();
+        });
         
         // Load the PDF with pdf-lib
         const pdfDoc = await PDFDocument.load(existingPdfBytes);

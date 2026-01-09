@@ -10,6 +10,15 @@ import { useRole } from '../hooks/useRole';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { AlertTriangle, BarChart3, ClipboardList, CheckCircle, Clock, Users, PieChart as PieChartIcon, Target, TrendingUp, Award, Zap, FolderKanban } from 'lucide-react';
+import { 
+    Table, 
+    TableHeader, 
+    TableBody, 
+    TableRow, 
+    TableHead, 
+    TableCell,
+    TableBadge
+} from '../components/ui/table';
 
 export const Statistics = () => {
     const { role } = useRole();
@@ -677,52 +686,52 @@ export const Statistics = () => {
                 </div>
 
                 {/* Projects Summary Table */}
-                <div className="mt-6 overflow-x-auto">
+                <div className="mt-6">
                     <h3 className="text-md font-semibold mb-4 text-textSecondary dark:text-textSecondary-dark">
                         ملخص المشاريع
                     </h3>
-                    <table className="table">
-                        <thead>
-                            <tr>
-                                <th className="w-16">#</th>
-                                <th>اسم المشروع</th>
-                                <th className="text-center">إجمالي المهام</th>
-                                <th className="text-center">المهام المنجزة</th>
-                                <th className="text-center">نسبة الإنجاز</th>
-                                <th className="text-center">الحالة</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                    <Table>
+                        <TableHeader>
+                            <TableRow hoverable={false}>
+                                <TableHead className="w-16">#</TableHead>
+                                <TableHead>اسم المشروع</TableHead>
+                                <TableHead align="center">إجمالي المهام</TableHead>
+                                <TableHead align="center">المهام المنجزة</TableHead>
+                                <TableHead align="center">نسبة الإنجاز</TableHead>
+                                <TableHead align="center">الحالة</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
                             {projectStats.map((project, index) => {
                                 const projectData = projects.find(p => p.id === project.id);
                                 return (
-                                    <tr key={project.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                                        <td>
+                                    <TableRow key={project.id}>
+                                        <TableCell>
                                             <div className="flex items-center justify-center">
                                                 <span className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center text-sm font-semibold text-purple-600">
                                                     {index + 1}
                                                 </span>
                                             </div>
-                                        </td>
-                                        <td>
+                                        </TableCell>
+                                        <TableCell>
                                             <span className="font-semibold text-base">{project.name}</span>
                                             {projectData?.description && (
                                                 <p className="text-xs text-textSecondary dark:text-textSecondary-dark mt-1">
                                                     {projectData.description}
                                                 </p>
                                             )}
-                                        </td>
-                                        <td className="text-center">
+                                        </TableCell>
+                                        <TableCell align="center">
                                             <span className="font-medium text-textPrimary dark:text-textPrimary-dark">
                                                 {project.total_tasks}
                                             </span>
-                                        </td>
-                                        <td className="text-center">
-                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400">
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <TableBadge variant="success">
                                                 {project.completed_tasks}
-                                            </span>
-                                        </td>
-                                        <td className="text-center">
+                                            </TableBadge>
+                                        </TableCell>
+                                        <TableCell align="center">
                                             <div className="flex items-center justify-center gap-2">
                                                 <div className="w-24 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                                                     <div
@@ -734,20 +743,17 @@ export const Statistics = () => {
                                                     {project.completion_rate}%
                                                 </span>
                                             </div>
-                                        </td>
-                                        <td className="text-center">
-                                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${projectData?.active
-                                                ? 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400'
-                                                : 'bg-gray-100 dark:bg-gray-900/20 text-gray-700 dark:text-gray-400'
-                                                }`}>
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <TableBadge variant={projectData?.active ? 'info' : 'default'}>
                                                 {projectData?.active ? 'نشط' : 'متوقف'}
-                                            </span>
-                                        </td>
-                                    </tr>
+                                            </TableBadge>
+                                        </TableCell>
+                                    </TableRow>
                                 );
                             })}
-                        </tbody>
-                    </table>
+                        </TableBody>
+                    </Table>
                 </div>
             </div>
 
@@ -762,56 +768,55 @@ export const Statistics = () => {
                         قائمة تفصيلية بأداء جميع الأعضاء ({totalMembers} عضو)
                     </p>
                 </div>
-                <div className="overflow-x-auto">
-                    {stats.member_performance && stats.member_performance.length > 0 ? (
-                        <table className="table">
-                            <thead>
-                                <tr>
-                                    <th className="w-16">#</th>
-                                    <th>الاسم</th>
-                                    <th className="text-center">المهام المنجزة</th>
-                                    <th className="text-center">إجمالي الساعات</th>
-                                    <th className="text-center">متوسط الساعات/مهمة</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {stats.member_performance.map((member, index) => {
-                                    const avgHours = member.completed_tasks > 0
-                                        ? (member.total_hours / member.completed_tasks).toFixed(1)
-                                        : '0';
-                                    return (
-                                        <tr key={member.user_id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                                            <td>
+                {stats.member_performance && stats.member_performance.length > 0 ? (
+                    <Table>
+                        <TableHeader>
+                            <TableRow hoverable={false}>
+                                <TableHead className="w-16">#</TableHead>
+                                <TableHead>الاسم</TableHead>
+                                <TableHead align="center">المهام المنجزة</TableHead>
+                                <TableHead align="center">إجمالي الساعات</TableHead>
+                                <TableHead align="center">متوسط الساعات/مهمة</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {stats.member_performance.map((member, index) => {
+                                const avgHours = member.completed_tasks > 0
+                                    ? (member.total_hours / member.completed_tasks).toFixed(1)
+                                    : '0';
+                                return (
+                                    <TableRow key={member.user_id}>
+                                            <TableCell>
                                                 <div className="flex items-center justify-center">
                                                     <span className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary">
                                                         {index + 1}
                                                     </span>
                                                 </div>
-                                            </td>
-                                            <td>
+                                            </TableCell>
+                                            <TableCell>
                                                 <span className="font-semibold text-base">{member.name}</span>
-                                            </td>
-                                            <td className="text-center">
-                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400">
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                <TableBadge variant="success">
                                                     {member.completed_tasks}
-                                                </span>
-                                            </td>
-                                            <td className="text-center">
+                                                </TableBadge>
+                                            </TableCell>
+                                            <TableCell align="center">
                                                 <span className="font-medium text-amber-600 dark:text-amber-400">
                                                     {member.total_hours.toFixed(1)} ساعة
                                                 </span>
-                                            </td>
-                                            <td className="text-center">
+                                            </TableCell>
+                                            <TableCell align="center">
                                                 <span className="text-textSecondary dark:text-textSecondary-dark">
                                                     {avgHours} ساعة
                                                 </span>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    ) : (
+                                            </TableCell>
+                                    </TableRow>
+                                );
+                            })}
+                        </TableBody>
+                    </Table>
+                ) : (
                         <EmptyState
                             icon={<Users className="w-16 h-16 text-gray-400" />}
                             title="لا توجد بيانات"

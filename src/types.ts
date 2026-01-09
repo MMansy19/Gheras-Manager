@@ -289,6 +289,7 @@ export const CourseSchema = z.object({
   start_date: z.string(),
   end_date: z.string(),
   active: z.boolean().default(true),
+  certificate_template_url: z.string().nullable().optional(),
   created_at: z.string().optional(),
   created_by: z.number().nullable().optional(),
 });
@@ -343,6 +344,7 @@ export const CreateCourseSchema = z.object({
   title: z.string().min(3, 'عنوان الدورة يجب أن يكون 3 أحرف على الأقل'),
   start_date: z.string(),
   created_by: z.number().optional(),
+  certificate_template_url: z.string().nullable().optional(),
 });
 
 // Update Course Input Schema
@@ -350,6 +352,7 @@ export const UpdateCourseSchema = z.object({
   title: z.string().min(3, 'عنوان الدورة يجب أن يكون 3 أحرف على الأقل').optional(),
   start_date: z.string().optional(),
   end_date: z.string().optional(),
+  certificate_template_url: z.string().nullable().optional(),
 });
 
 export type UpdateCourseInput = z.infer<typeof UpdateCourseSchema>;

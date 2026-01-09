@@ -17,6 +17,16 @@ import { Button } from '../components/ui/button';
 import { Label } from '../components/ui/label';
 import { Input } from '../components/ui/input';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { CertificateUpload } from '../components/CertificateUpload';
+import { 
+    Table, 
+    TableHeader, 
+    TableBody, 
+    TableRow, 
+    TableHead, 
+    TableCell,
+    TableBadge
+} from '../components/ui/table';
 
 export const CourseManagement = () => {
     const queryClient = useQueryClient();
@@ -24,9 +34,11 @@ export const CourseManagement = () => {
     const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
     const [startDate, setStartDate] = useState<Date | undefined>(new Date());
     const [courseTitle, setCourseTitle] = useState('دورة غراس لمدة 10 أيام');
+    const [certificateTemplateUrl, setCertificateTemplateUrl] = useState<string | null>(null);
     const [editingCourse, setEditingCourse] = useState<Course | null>(null);
     const [editTitle, setEditTitle] = useState('');
     const [editStartDate, setEditStartDate] = useState<Date | undefined>();
+    const [editCertificateUrl, setEditCertificateUrl] = useState<string | null>(null);
     const [confirmDialog, setConfirmDialog] = useState<{
         isOpen: boolean;
         courseId: number | null;
@@ -98,6 +110,7 @@ export const CourseManagement = () => {
         const input: CreateCourseInput = {
             title: courseTitle,
             start_date: startDate.toISOString().split('T')[0],
+            certificate_template_url: certificateTemplateUrl,
         };
 
         createCourseMutation.mutate(input);
@@ -107,6 +120,7 @@ export const CourseManagement = () => {
         setEditingCourse(course);
         setEditTitle(course.title);
         setEditStartDate(new Date(course.start_date));
+        setEditCertificateUrl(course.certificate_template_url || null);
     };
 
     const handleUpdateCourse = async () => {
@@ -114,6 +128,7 @@ export const CourseManagement = () => {
 
         const input: UpdateCourseInput = {
             title: editTitle,
+            certificate_template_url: editCertificateUrl,
         };
 
         if (editStartDate) {
@@ -193,6 +208,12 @@ export const CourseManagement = () => {
                             </p>
                         </div>
 
+                        <CertificateUpload
+                            currentTemplateUrl={certificateTemplateUrl}
+                            onUploadSuccess={(url) => setCertificateTemplateUrl(url)}
+                            onRemove={() => setCertificateTemplateUrl(null)}
+                        />
+
                         <div className="flex gap-3">
                             <Button
                                 onClick={handleCreateCourse}
@@ -245,6 +266,13 @@ export const CourseManagement = () => {
                                 سيتم تحديث تاريخ النهاية تلقائياً (+9 أيام)
                             </p>
                         </div>
+
+                        <CertificateUpload
+                            courseId={editingCourse.id}
+                            currentTemplateUrl={editCertificateUrl}
+                            onUploadSuccess={(url) => setEditCertificateUrl(url)}
+                            onRemove={() => setEditCertificateUrl(null)}
+                        />
 
                         <div className="flex gap-3">
                             <Button
@@ -358,64 +386,62 @@ export const CourseManagement = () => {
                     {enrollmentsLoading ? (
                         <LoadingSpinner message="جاري تحميل البيانات..." />
                     ) : enrollments && enrollments.length > 0 ? (
-                        <div className="overflow-x-auto">
-                            <table className="table">
-                                <thead>
-                                    <tr>
-                                        <th>الاسم</th>
-                                        <th>البريد الإلكتروني</th>
-                                        <th>تاريخ التسجيل</th>
-                                        <th>الحضور (10 أيام)</th>
-                                        <th className="text-center">الحالة</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {enrollments.map((enrollment) => (
-                                        <tr key={enrollment.id}>
-                                            <td className="font-semibold">{enrollment.full_name}</td>
-                                            <td className="text-sm" dir="ltr">{enrollment.email}</td>
-                                            <td className="text-sm">
-                                                {formatDate(enrollment.created_at || '')}
-                                            </td>
-                                            <td>
-                                                <div className="flex gap-1">
-                                                    {Array.from({ length: 10 }, (_, i) => {
-                                                        const day = i + 1;
-                                                        const attended = enrollment.attendance_days.includes(day);
-                                                        return (
-                                                            <div
-                                                                key={day}
-                                                                className={`
-                                                                    w-6 h-6 rounded flex items-center justify-center text-xs font-bold
-                                                                    ${attended
-                                                                        ? 'bg-green-500 text-white'
-                                                                        : 'bg-gray-200 dark:bg-gray-700 text-gray-400'
-                                                                    }
-                                                                `}
-                                                                title={`يوم ${day}`}
-                                                            >
-                                                                {attended ? <Check className="w-3 h-3" /> : day}
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                            </td>
-                                            <td className="text-center">
-                                                {enrollment.is_complete ? (
-                                                    <span className="badge-status-done">
-                                                        مكتمل
-                                                    </span>
-                                                ) : (
-                                                    <span className="badge-status-in_progress">
-                                                        {enrollment.attendance_count}/10
-                                                    </span>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                        <Table>
+                            <TableHeader>
+                                <TableRow hoverable={false}>
+                                    <TableHead>الاسم</TableHead>
+                                    <TableHead>البريد الإلكتروني</TableHead>
+                                    <TableHead>تاريخ التسجيل</TableHead>
+                                    <TableHead>الحضور (10 أيام)</TableHead>
+                                    <TableHead align="center">الحالة</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {enrollments.map((enrollment) => (
+                                    <TableRow key={enrollment.id}>
+                                        <TableCell className="font-semibold">{enrollment.full_name}</TableCell>
+                                        <TableCell className="text-sm" dir="ltr">{enrollment.email}</TableCell>
+                                        <TableCell className="text-sm">
+                                            {formatDate(enrollment.created_at || '')}
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex gap-1">
+                                                {Array.from({ length: 10 }, (_, i) => {
+                                                    const day = i + 1;
+                                                    const attended = enrollment.attendance_days.includes(day);
+                                                    return (
+                                                        <div
+                                                            key={day}
+                                                            className={`
+                                                                w-6 h-6 rounded flex items-center justify-center text-xs font-bold
+                                                                ${attended
+                                                                    ? 'bg-green-500 text-white'
+                                                                    : 'bg-gray-200 dark:bg-gray-700 text-gray-400'
+                                                                }
+                                                            `}
+                                                            title={`يوم ${day}`}
+                                                        >
+                                                            {attended ? <Check className="w-3 h-3" /> : day}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            {enrollment.is_complete ? (
+                                                <TableBadge variant="success">
+                                                    مكتمل
+                                                </TableBadge>
+                                            ) : (
+                                                <TableBadge variant="info">
+                                                    {enrollment.attendance_count}/10
+                                                </TableBadge>
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
                     ) : (
                         <div className="text-center py-8 text-textSecondary dark:text-textSecondary-dark">
                             <Users className="w-12 h-12 mx-auto mb-2 opacity-50" />
