@@ -104,11 +104,11 @@ export const CourseLoginForm = ({ courseId, onCertificateReady }: CourseLoginFor
             // Check if any attendance was today
             if (existingEnrollments && existingEnrollments.length > 0) {
                 // First check if they have completed all 10 days
-                const enrollment = existingEnrollments[0];
+                const enrollmentData = existingEnrollments[0];
                 const { data: allAttendances } = await supabase
                     .from('daily_attendances')
                     .select('*')
-                    .eq('enrollment_id', enrollment.id);
+                    .eq('enrollment_id', enrollmentData.id);
                 
                 const hasCompletedAll10Days = allAttendances && allAttendances.length >= 10;
                 
@@ -124,6 +124,27 @@ export const CourseLoginForm = ({ courseId, onCertificateReady }: CourseLoginFor
                     });
 
                     if (hasLoggedInToday) {
+                        // Load enrollment data to show attendance even though they can't sign again
+                        const { data: fullEnrollment } = await supabase
+                            .from('enrollments')
+                            .select('*')
+                            .eq('id', enrollmentData.id)
+                            .single();
+                        
+                        if (fullEnrollment && allAttendances) {
+                            setEnrollment(fullEnrollment);
+                            setAttendances(allAttendances);
+                            setSignedToday(true);
+                            
+                            // Check if complete
+                            const complete = allAttendances.length >= 10;
+                            setIsComplete(complete);
+                            
+                            if (complete) {
+                                onCertificateReady(fullEnrollment.id, fullEnrollment.full_name);
+                            }
+                        }
+                        
                         setError('لقد قمت بتسجيل الحضور اليوم بالفعل');
                         return;
                     }
