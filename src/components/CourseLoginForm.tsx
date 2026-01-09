@@ -320,17 +320,22 @@ export const CourseLoginForm = ({ courseId, onCertificateReady }: CourseLoginFor
                         const day = i + 1;
                         const attended = enrollment ? attendances.some(att => att.day_number === day) : false;
                         const isToday = day === currentDay;
+                        const notLoggedIn = !enrollment;
 
                         return (
                             <div
                                 key={day}
                                 className={`
                                     p-3 rounded-lg text-center font-semibold transition-all
-                                    ${attended
-                                        ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-2 border-green-500'
-                                        : isToday
-                                            ? 'bg-primary/10 dark:bg-primary/20 text-primary border-2 border-primary'
-                                            : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 border-2 border-gray-300 dark:border-gray-700'
+                                    ${notLoggedIn
+                                        ? isToday
+                                            ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-2 border-blue-300 dark:border-blue-700'
+                                            : 'bg-slate-50 dark:bg-slate-800/50 text-slate-400 dark:text-slate-600 border-2 border-slate-200 dark:border-slate-700'
+                                        : attended
+                                            ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-2 border-green-500'
+                                            : isToday
+                                                ? 'bg-primary/10 dark:bg-primary/20 text-primary border-2 border-primary'
+                                                : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 border-2 border-gray-300 dark:border-gray-700'
                                     }
                                 `}
                             >
