@@ -189,6 +189,7 @@ export const getCurrentDayNumber = async (courseId?: number): Promise<number | n
 
 /**
  * Create enrollment for a new user (called after Supabase Auth signup)
+ * Automatically marks day 1 attendance
  */
 export const createEnrollment = async (
     userId: string,
@@ -208,7 +209,23 @@ export const createEnrollment = async (
         .single();
 
     if (error) throw new Error(`فشل إنشاء التسجيل: ${error.message}`);
-    return EnrollmentSchema.parse(data);
+    
+    const enrollment = EnrollmentSchema.parse(data);
+    
+    // Automatically sign day 1 attendance
+    try {
+        await supabase
+            .from('daily_attendances')
+            .insert({
+                enrollment_id: enrollment.id,
+                day_number: 1,
+            });
+    } catch (attendanceError) {
+        console.error('Failed to auto-sign day 1:', attendanceError);
+        // Don't throw error - enrollment was successful
+    }
+    
+    return enrollment;
 };
 
 /**
@@ -228,6 +245,49 @@ export const getEnrollmentByUser = async (
     if (error) {
         if (error.code === 'PGRST116') return null; // Not enrolled
         throw new Error(`فشل جلب التسجيل: ${error.message}`);
+    }
+
+    return data ? EnrollmentSchema.parse(data) : null;
+};
+
+/**
+ * Get any enrollment by email (for checking if user has an account)
+ */
+export const getEnrollmentByEmailAny = async (
+    email: string
+): Promise<Enrollment | null> => {
+    const { data, error } = await supabase
+        .from('enrollments')
+        .select('*')
+        .eq('email', email)
+        .limit(1)
+        .single();
+
+    if (error) {
+        if (error.code === 'PGRST116') return null; // No enrollment found
+        throw new Error(`فشل التحقق من البريد الإلكتروني: ${error.message}`);
+    }
+
+    return data ? EnrollmentSchema.parse(data) : null;
+};
+
+/**
+ * Check if email is already enrolled in a specific course
+ */
+export const getEnrollmentByEmail = async (
+    email: string,
+    courseId: number
+): Promise<Enrollment | null> => {
+    const { data, error } = await supabase
+        .from('enrollments')
+        .select('*')
+        .eq('email', email)
+        .eq('course_id', courseId)
+        .single();
+
+    if (error) {
+        if (error.code === 'PGRST116') return null; // Not enrolled
+        throw new Error(`فشل التحقق من التسجيل: ${error.message}`);
     }
 
     return data ? EnrollmentSchema.parse(data) : null;

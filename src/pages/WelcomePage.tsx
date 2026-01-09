@@ -207,7 +207,7 @@ export const WelcomePage = () => {
                                                 {formatDate(course.start_date)} - {formatDate(course.end_date)}
                                             </p>
                                         </div>
-                                        <ArrowLeft className="w-5 h-5 text-primary transform rotate-180" />
+                                        <ArrowLeft className="w-5 h-5 text-primary transform" />
                                     </div>
                                 </button>
                             ))}
@@ -253,14 +253,14 @@ export const WelcomePage = () => {
 
                         {/* Back to Course Selection */}
                         {courses.length > 1 && (
-                            <div className="mt-4">
+                            <div className="mt-4" dir='rtl'>
                                 <Button
                                     onClick={() => setSelectedCourse(null)}
                                     variant="outline"
                                     className="w-full"
                                     size="sm"
                                 >
-                                    ← العودة لاختيار الدورة
+                                     → العودة لاختيار الدورة
                                 </Button>
                             </div>
                         )}

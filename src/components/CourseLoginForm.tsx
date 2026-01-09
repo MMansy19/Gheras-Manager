@@ -74,6 +74,49 @@ export const CourseLoginForm = ({ courseId, onCertificateReady }: CourseLoginFor
             // Validate form data
             const validated = CourseLoginSchema.parse(formData);
 
+            // Get the current day number first
+            const day = await getCurrentDayNumber(courseId);
+            if (!day) {
+                setError('الدورة غير نشطة حالياً');
+                return;
+            }
+
+            // Check if this email has already logged in today for this course
+            // This check happens BEFORE authentication
+            const { data: existingEnrollments, error: enrollmentCheckError } = await supabase
+                .from('enrollments')
+                .select(`
+                    id,
+                    email,
+                    daily_attendances!inner (
+                        day_number,
+                        signed_at
+                    )
+                `)
+                .eq('email', validated.email)
+                .eq('course_id', courseId)
+                .eq('daily_attendances.day_number', day);
+
+            if (enrollmentCheckError) {
+                console.error('Error checking existing attendance:', enrollmentCheckError);
+            }
+
+            // Check if any attendance was today
+            if (existingEnrollments && existingEnrollments.length > 0) {
+                const today = new Date().toISOString().split('T')[0];
+                const hasLoggedInToday = existingEnrollments.some((enrollment: any) => {
+                    return enrollment.daily_attendances?.some((att: any) => {
+                        const signedDate = new Date(att.signed_at).toISOString().split('T')[0];
+                        return signedDate === today;
+                    });
+                });
+
+                if (hasLoggedInToday) {
+                    setError('لقد قمت بتسجيل الحضور اليوم بالفعل');
+                    return;
+                }
+            }
+
             // Sign in with Supabase Auth
             const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
                 email: validated.email,
@@ -113,13 +156,6 @@ export const CourseLoginForm = ({ courseId, onCertificateReady }: CourseLoginFor
             const userAttendances = await getAttendanceByEnrollment(userEnrollment.id);
             setEnrollment(userEnrollment);
             setAttendances(userAttendances);
-
-            // Check if already signed today
-            const day = await getCurrentDayNumber(courseId);
-            if (!day) {
-                setError('الدورة غير نشطة حالياً');
-                return;
-            }
 
             const alreadySigned = userAttendances.some(att => att.day_number === day);
 
@@ -162,7 +198,7 @@ export const CourseLoginForm = ({ courseId, onCertificateReady }: CourseLoginFor
                             البريد الإلكتروني
                         </Label>
                         <div className="relative">
-                            <Mail className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-textSecondary dark:text-textSecondary-dark pointer-events-none" />
+                            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-textSecondary dark:text-textSecondary-dark pointer-events-none" />
                             <Input
                                 type="email"
                                 id="email"
@@ -184,7 +220,7 @@ export const CourseLoginForm = ({ courseId, onCertificateReady }: CourseLoginFor
                             كلمة المرور
                         </Label>
                         <div className="relative">
-                            <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-textSecondary dark:text-textSecondary-dark pointer-events-none" />
+                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-textSecondary dark:text-textSecondary-dark pointer-events-none" />
                             <Input
                                 type="password"
                                 id="password"

@@ -89,6 +89,9 @@ export const CourseManagement = () => {
         }
     }, [activeCourse]);
 
+    // Get the selected course from the courses list
+    const selectedCourse = courses?.find(c => c.id === selectedCourseId);
+
     const handleCreateCourse = async () => {
         if (!startDate || !courseTitle.trim()) return;
 
@@ -268,14 +271,14 @@ export const CourseManagement = () => {
             )}
 
             {/* Active Course Overview */}
-            {activeCourse && !editingCourse && (
+            {selectedCourse && !editingCourse && (
                 <div className="card bg-gradient-to-br from-primary-50 to-green-50 dark:from-primary-900/30 dark:to-green-900/30 border-primary">
                     <div className="flex items-start justify-between mb-4">
                         <div className="flex-1">
                             <div className="flex items-center gap-3 mb-2">
-                                <h3 className="text-xl font-bold text-primary">{activeCourse.title}</h3>
+                                <h3 className="text-xl font-bold text-primary">{selectedCourse.title}</h3>
                                 <Button
-                                    onClick={() => handleEditCourse(activeCourse)}
+                                    onClick={() => handleEditCourse(selectedCourse)}
                                     variant="ghost"
                                     size="sm"
                                     className="text-primary"
@@ -284,10 +287,12 @@ export const CourseManagement = () => {
                                 </Button>
                             </div>
                             <p className="text-sm text-textSecondary dark:text-textSecondary-dark">
-                                {formatDate(activeCourse.start_date)} - {formatDate(activeCourse.end_date)}
+                                {formatDate(selectedCourse.start_date)} - {formatDate(selectedCourse.end_date)}
                             </p>
                         </div>
-                        <span className="badge bg-green-500 text-white">نشطة</span>
+                        <span className={`badge ${selectedCourse.active ? 'bg-green-500' : 'bg-gray-500'} text-white`}>
+                            {selectedCourse.active ? 'نشطة' : 'منتهية'}
+                        </span>
                     </div>
 
                     {courseStats && (
@@ -438,11 +443,12 @@ export const CourseManagement = () => {
                                 onClick={() => setSelectedCourseId(course.id)}
                             >
                                 <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="font-semibold">
+                                    <div className="flex-1">
+                                        <h4 className="font-bold text-lg mb-1">{course.title}</h4>
+                                        <p className="text-sm text-textSecondary dark:text-textSecondary-dark">
                                             {formatDate(course.start_date)} - {formatDate(course.end_date)}
                                         </p>
-                                        <p className="text-sm text-textSecondary dark:text-textSecondary-dark">
+                                        <p className="text-xs text-textSecondary dark:text-textSecondary-dark mt-1">
                                             معرف: {course.id}
                                         </p>
                                     </div>
