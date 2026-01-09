@@ -8,6 +8,7 @@ import { LoadingSpinner } from '../components/LoadingSpinner';
 import { Award, Calendar, ArrowLeft, BookOpen } from 'lucide-react';
 import { Course } from '../types';
 import { Button } from '../components/ui/button';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 export const WelcomePage = () => {
     const navigate = useNavigate();
@@ -22,6 +23,8 @@ export const WelcomePage = () => {
         fullName: string;
     } | null>(null);
     const [downloadingCert, setDownloadingCert] = useState(false);
+    const [showErrorDialog, setShowErrorDialog] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
         loadCourseData();
@@ -74,7 +77,8 @@ export const WelcomePage = () => {
             await generateCertificate(certificateData.fullName);
         } catch (err) {
             console.error('Error generating certificate:', err);
-            alert('حدث خطأ في توليد الشهادة. يرجى المحاولة مرة أخرى.');
+            setErrorMessage('حدث خطأ في توليد الشهادة. يرجى المحاولة مرة أخرى.');
+            setShowErrorDialog(true);
         } finally {
             setDownloadingCert(false);
         }
@@ -284,6 +288,15 @@ export const WelcomePage = () => {
                     </p>
                 </div>
             </div>
+            
+            <ConfirmDialog
+                isOpen={showErrorDialog}
+                onClose={() => setShowErrorDialog(false)}
+                onConfirm={() => setShowErrorDialog(false)}
+                title="خطأ"
+                message={errorMessage}
+                confirmText="حسناً"
+            />
         </div>
     );
 };
