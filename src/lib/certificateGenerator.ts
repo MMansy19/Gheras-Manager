@@ -98,8 +98,15 @@ const reshapeArabic = (text: string): string => {
  * Uses existing PDF template from storage and adds student name
  * @param fullName - Student's full name in Arabic
  * @param templateUrl - URL to the certificate template PDF from Supabase Storage (required)
+ * @param yPosition - Y coordinate position for the student name (optional, defaults to center)
+ * @param fontSize - Font size for the student name (optional, defaults to 32)
  */
-export const generateCertificate = async (fullName: string, templateUrl?: string): Promise<void> => {
+export const generateCertificate = async (
+    fullName: string, 
+    templateUrl?: string,
+    yPosition?: number | null,
+    fontSize?: number | null
+): Promise<void> => {
     try {
         // Template URL is required - must be from storage
         if (!templateUrl) {
@@ -131,25 +138,23 @@ export const generateCertificate = async (fullName: string, templateUrl?: string
         const firstPage = pages[0];
         const { width, height } = firstPage.getSize();
         
-        // Add student name
-        // Position coordinates: adjust these based on your template
-        // Y coordinate: 0 = bottom, height = top
-        // For A4 landscape (842 x 595 points), middle is ~297
-        const fontSize = 32;
+        // Use provided fontSize or default to 32
+        const finalFontSize = fontSize || 32;
         
         // Reshape Arabic text for proper display
         const processedName = reshapeArabic(fullName);
-        const textWidth = arabicFont.widthOfTextAtSize(processedName, fontSize);
+        const textWidth = arabicFont.widthOfTextAtSize(processedName, finalFontSize);
         
-        // Position: center horizontally, adjust Y based on your template
-        // Change this Y value to match your certificate design
-        const xPosition = width / 2 - textWidth / 2 - 10; // Adjust this number left/right as needed
-        const yPosition = height / 2 ; // Adjust this number up/down as needed
+        // Position: center horizontally, use provided Y or default to center
+        const xPosition = width / 2 - textWidth / 2 - 10;
+        const finalYPosition = yPosition !== null && yPosition !== undefined 
+            ? yPosition 
+            : height / 2;
         
         firstPage.drawText(processedName, {
             x: xPosition,
-            y: yPosition,
-            size: fontSize,
+            y: finalYPosition,
+            size: finalFontSize,
             font: arabicFont,
             color: rgb(0.82, 0.11, 0.14), // #D21D23 in RGB
         });

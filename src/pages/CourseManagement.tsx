@@ -35,10 +35,14 @@ export const CourseManagement = () => {
     const [startDate, setStartDate] = useState<Date | undefined>(new Date());
     const [courseTitle, setCourseTitle] = useState('دورة غراس لمدة 10 أيام');
     const [certificateTemplateUrl, setCertificateTemplateUrl] = useState<string | null>(null);
+    const [certificateYPosition, setCertificateYPosition] = useState<number>(297);
+    const [certificateFontSize, setCertificateFontSize] = useState<number>(32);
     const [editingCourse, setEditingCourse] = useState<Course | null>(null);
     const [editTitle, setEditTitle] = useState('');
     const [editStartDate, setEditStartDate] = useState<Date | undefined>();
     const [editCertificateUrl, setEditCertificateUrl] = useState<string | null>(null);
+    const [editCertificateYPosition, setEditCertificateYPosition] = useState<number>(297);
+    const [editCertificateFontSize, setEditCertificateFontSize] = useState<number>(32);
     const [confirmDialog, setConfirmDialog] = useState<{
         isOpen: boolean;
         courseId: number | null;
@@ -111,6 +115,8 @@ export const CourseManagement = () => {
             title: courseTitle,
             start_date: startDate.toISOString().split('T')[0],
             certificate_template_url: certificateTemplateUrl,
+            certificate_y_position: certificateYPosition,
+            certificate_font_size: certificateFontSize,
         };
 
         createCourseMutation.mutate(input);
@@ -121,6 +127,8 @@ export const CourseManagement = () => {
         setEditTitle(course.title);
         setEditStartDate(new Date(course.start_date));
         setEditCertificateUrl(course.certificate_template_url || null);
+        setEditCertificateYPosition(course.certificate_y_position || 297);
+        setEditCertificateFontSize(course.certificate_font_size || 32);
     };
 
     const handleUpdateCourse = async () => {
@@ -129,6 +137,8 @@ export const CourseManagement = () => {
         const input: UpdateCourseInput = {
             title: editTitle,
             certificate_template_url: editCertificateUrl,
+            certificate_y_position: editCertificateYPosition,
+            certificate_font_size: editCertificateFontSize,
         };
 
         if (editStartDate) {
@@ -214,6 +224,36 @@ export const CourseManagement = () => {
                             onRemove={() => setCertificateTemplateUrl(null)}
                         />
 
+                        {certificateTemplateUrl && (
+                            <div className="space-y-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                <h4 className="font-medium text-sm">إعدادات موضع النص</h4>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <Label htmlFor="cert-y-position">موضع Y (من الأسفل)</Label>
+                                        <Input
+                                            id="cert-y-position"
+                                            type="number"
+                                            value={certificateYPosition}
+                                            onChange={(e) => setCertificateYPosition(Number(e.target.value))}
+                                            placeholder="297"
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">القيمة الافتراضية: 297</p>
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="cert-font-size">حجم الخط</Label>
+                                        <Input
+                                            id="cert-font-size"
+                                            type="number"
+                                            value={certificateFontSize}
+                                            onChange={(e) => setCertificateFontSize(Number(e.target.value))}
+                                            placeholder="32"
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">القيمة الافتراضية: 32</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="flex gap-3">
                             <Button
                                 onClick={handleCreateCourse}
@@ -273,6 +313,36 @@ export const CourseManagement = () => {
                             onUploadSuccess={(url) => setEditCertificateUrl(url)}
                             onRemove={() => setEditCertificateUrl(null)}
                         />
+
+                        {editCertificateUrl && (
+                            <div className="space-y-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                <h4 className="font-medium text-sm">إعدادات موضع النص</h4>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <Label htmlFor="edit-cert-y-position">موضع Y (من الأسفل)</Label>
+                                        <Input
+                                            id="edit-cert-y-position"
+                                            type="number"
+                                            value={editCertificateYPosition}
+                                            onChange={(e) => setEditCertificateYPosition(Number(e.target.value))}
+                                            placeholder="297"
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">القيمة الافتراضية: 297</p>
+                                    </div>
+                                    <div>
+                                        <Label htmlFor="edit-cert-font-size">حجم الخط</Label>
+                                        <Input
+                                            id="edit-cert-font-size"
+                                            type="number"
+                                            value={editCertificateFontSize}
+                                            onChange={(e) => setEditCertificateFontSize(Number(e.target.value))}
+                                            placeholder="32"
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">القيمة الافتراضية: 32</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         <div className="flex gap-3">
                             <Button

@@ -81,7 +81,12 @@ export const WelcomePage = () => {
                 setShowErrorDialog(true);
                 return;
             }
-            await generateCertificate(certificateData.fullName, templateUrl);
+            await generateCertificate(
+                certificateData.fullName, 
+                templateUrl,
+                selectedCourse.certificate_y_position,
+                selectedCourse.certificate_font_size
+            );
         } catch (err) {
             console.error('Error generating certificate:', err);
             setErrorMessage('حدث خطأ في توليد الشهادة. يرجى المحاولة مرة أخرى.');
@@ -143,7 +148,34 @@ export const WelcomePage = () => {
                         </p>
                     )}
                 </div>
-
+                {certificateReady && (
+                <div className="card text-center">
+                    <div className="flex justify-center mb-4">
+                        <div className="w-20 h-20 bg-gradient-to-br from-primary to-green-500 rounded-full flex items-center justify-center">
+                            <Award className="w-12 h-12 text-white" />
+                        </div>
+                    </div>
+                    <h2 className="text-2xl font-black mb-2 text-primary">
+                        مبروك {certificateData?.fullName}!
+                    </h2>
+                    <p className="text-lg font-semibold mb-4">
+                        لقد أكملت دورة غراس بنجاح
+                    </p>
+                    <p className="text-textSecondary dark:text-textSecondary-dark mb-6">
+                        حضرت جميع الأيام العشرة. يمكنك الآن تحميل شهادة إتمام الدورة
+                    </p>
+                    <Button
+                        onClick={handleDownloadCertificate}
+                        className="w-full gap-2 mb-3"
+                        size="lg"
+                        disabled={downloadingCert}
+                    >
+                        <Award className="w-5 h-5" />
+                        {downloadingCert ? 'جاري التحميل...' : 'تحميل الشهادة'}
+                    </Button>
+                </div>
+                )}
+                
                 {/* Main Content */}
                 {courses.length === 0 ? (
                     /* No Active Course */
@@ -159,40 +191,6 @@ export const WelcomePage = () => {
                             className="gap-2"
                         >
                             <ArrowLeft className="w-4 h-4" />
-                            الدخول كمسؤول
-                        </Button>
-                    </div>
-                ) : certificateReady ? (
-                    /* Certificate Ready */
-                    <div className="card text-center">
-                        <div className="flex justify-center mb-4">
-                            <div className="w-20 h-20 bg-gradient-to-br from-primary to-green-500 rounded-full flex items-center justify-center">
-                                <Award className="w-12 h-12 text-white" />
-                            </div>
-                        </div>
-                        <h2 className="text-2xl font-black mb-2 text-primary">
-                            مبروك {certificateData?.fullName}!
-                        </h2>
-                        <p className="text-lg font-semibold mb-4">
-                            لقد أكملت دورة غراس بنجاح
-                        </p>
-                        <p className="text-textSecondary dark:text-textSecondary-dark mb-6">
-                            حضرت جميع الأيام العشرة. يمكنك الآن تحميل شهادة إتمام الدورة
-                        </p>
-                        <Button
-                            onClick={handleDownloadCertificate}
-                            className="w-full gap-2 mb-3"
-                            size="lg"
-                            disabled={downloadingCert}
-                        >
-                            <Award className="w-5 h-5" />
-                            {downloadingCert ? 'جاري التحميل...' : 'تحميل الشهادة'}
-                        </Button>
-                        <Button
-                            onClick={() => navigate('/admin/select-role')}
-                            variant="ghost"
-                            size="sm"
-                        >
                             الدخول كمسؤول
                         </Button>
                     </div>
@@ -275,16 +273,6 @@ export const WelcomePage = () => {
                                 </Button>
                             </div>
                         )}
-
-                        {/* Admin Link */}
-                        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 text-center">
-                            <button
-                                onClick={() => navigate('/admin/select-role')}
-                                className="text-sm text-textSecondary dark:text-textSecondary-dark hover:text-primary transition-colors"
-                            >
-                                الدخول كمسؤول ←
-                            </button>
-                        </div>
                     </div>
                 )}
 

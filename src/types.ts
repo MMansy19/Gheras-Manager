@@ -290,6 +290,8 @@ export const CourseSchema = z.object({
   end_date: z.string(),
   active: z.boolean().default(true),
   certificate_template_url: z.string().nullable().optional(),
+  certificate_y_position: z.number().nullable().optional(),
+  certificate_font_size: z.number().nullable().optional(),
   created_at: z.string().optional(),
   created_by: z.number().nullable().optional(),
 });
@@ -345,6 +347,8 @@ export const CreateCourseSchema = z.object({
   start_date: z.string(),
   created_by: z.number().optional(),
   certificate_template_url: z.string().nullable().optional(),
+  certificate_y_position: z.number().nullable().optional(),
+  certificate_font_size: z.number().nullable().optional(),
 });
 
 // Update Course Input Schema
@@ -353,6 +357,8 @@ export const UpdateCourseSchema = z.object({
   start_date: z.string().optional(),
   end_date: z.string().optional(),
   certificate_template_url: z.string().nullable().optional(),
+  certificate_y_position: z.number().nullable().optional(),
+  certificate_font_size: z.number().nullable().optional(),
 });
 
 export type UpdateCourseInput = z.infer<typeof UpdateCourseSchema>;

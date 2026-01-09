@@ -255,16 +255,6 @@ export const CourseLoginForm = ({ courseId, onCertificateReady }: CourseLoginFor
                         </div>
                     )}
 
-                    {/* Current Day Info */}
-                    {currentDay && (
-                        <div className="p-3 bg-primary/10 dark:bg-primary/20 border border-primary/30 rounded-lg text-center">
-                            <div className="flex items-center justify-center gap-2 text-primary dark:text-primary-300">
-                                <Calendar className="w-5 h-5" />
-                                <span className="font-semibold">اليوم {currentDay} من 10</span>
-                            </div>
-                        </div>
-                    )}
-
                     {/* Submit Button */}
                     <Button
                         type="submit"
@@ -277,7 +267,7 @@ export const CourseLoginForm = ({ courseId, onCertificateReady }: CourseLoginFor
                     </Button>
                 </form>
             ) : (
-                /* Success State - Show Attendance Progress */
+                /* Success Message after login */
                 <div className="space-y-4">
                     {/* Only show success message if NOT on the last day OR not complete */}
                     {(!isComplete || currentDay !== 10) && (
@@ -295,54 +285,54 @@ export const CourseLoginForm = ({ courseId, onCertificateReady }: CourseLoginFor
                             </div>
                         </div>
                     )}
-
-                    {/* Attendance Grid */}
-                    <div className="card">
-                        <h4 className="font-bold mb-3 flex items-center gap-2">
-                            <Calendar className="w-5 h-5 text-primary" />
-                            سجل الحضور
-                        </h4>
-                        <div className="grid grid-cols-5 gap-2">
-                            {Array.from({ length: 10 }, (_, i) => {
-                                const day = i + 1;
-                                const attended = attendances.some(att => att.day_number === day);
-                                const isToday = day === currentDay;
-
-                                return (
-                                    <div
-                                        key={day}
-                                        className={`
-                                            p-3 rounded-lg text-center font-semibold transition-all
-                                            ${attended
-                                                ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-2 border-green-500'
-                                                : isToday
-                                                    ? 'bg-primary/10 dark:bg-primary/20 text-primary border-2 border-primary'
-                                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 border-2 border-gray-300 dark:border-gray-700'
-                                            }
-                                        `}
-                                    >
-                                        <div className="text-xs mb-1">يوم</div>
-                                        <div className="text-lg">{day}</div>
-                                        {attended && <Check className="w-4 h-4 mx-auto mt-1" />}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                        <div className="mt-4 text-center">
-                            <p className="text-sm text-textSecondary dark:text-textSecondary-dark">
-                                الحضور: <span className="font-bold text-primary">{attendances.length}</span> من 10 أيام
-                            </p>
-                            {isComplete && (
-                                <div className="mt-3 p-3 bg-gradient-to-r from-primary-50 to-green-50 dark:from-primary-900/30 dark:to-green-900/30 border border-primary rounded-lg">
-                                    <p className="font-bold text-primary">
-                                        🎉 مبارك! لقد أكملت الدورة بنجاح
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
                 </div>
             )}
+
+            {/* Attendance Grid - Always visible (before and after enrollment) */}
+            <div className="card">
+                <h4 className="font-bold mb-3 flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-primary" />
+                    سجل الحضور
+                </h4>
+                <div className="grid grid-cols-5 gap-2">
+                    {Array.from({ length: 10 }, (_, i) => {
+                        const day = i + 1;
+                        const attended = enrollment ? attendances.some(att => att.day_number === day) : false;
+                        const isToday = day === currentDay;
+
+                        return (
+                            <div
+                                key={day}
+                                className={`
+                                    p-3 rounded-lg text-center font-semibold transition-all
+                                    ${attended
+                                        ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-2 border-green-500'
+                                        : isToday
+                                            ? 'bg-primary/10 dark:bg-primary/20 text-primary border-2 border-primary'
+                                            : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 border-2 border-gray-300 dark:border-gray-700'
+                                    }
+                                `}
+                            >
+                                <div className="text-xs mb-1">يوم</div>
+                                <div className="text-lg">{day}</div>
+                                {attended && <Check className="w-4 h-4 mx-auto mt-1" />}
+                            </div>
+                        );
+                    })}
+                </div>
+                <div className="mt-4 text-center">
+                    <p className="text-sm text-textSecondary dark:text-textSecondary-dark">
+                        الحضور: <span className="font-bold text-primary">{enrollment ? attendances.length : 0}</span> من 10 أيام
+                    </p>
+                    {isComplete && (
+                        <div className="mt-3 p-3 bg-gradient-to-r from-primary-50 to-green-50 dark:from-primary-900/30 dark:to-green-900/30 border border-primary rounded-lg">
+                            <p className="font-bold text-primary">
+                                🎉 مبارك! لقد أكملت الدورة بنجاح
+                            </p>
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
     );
 };

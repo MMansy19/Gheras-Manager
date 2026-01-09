@@ -824,7 +824,6 @@ export const Statistics = () => {
                         />
                     )}
                 </div>
-            </div>
-        </div>
+            </div >
     );
 };
