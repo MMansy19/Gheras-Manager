@@ -5,6 +5,7 @@ import { useRole } from '../hooks/useRole';
 import { useAuth } from '../contexts/AuthContext';
 import { UserRole, ROLE_LABELS } from '../types';
 import { ShieldCheck, UserCheck, UserCog, Info, Lock } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 export const RoleSelection = () => {
     const navigate = useNavigate();
@@ -143,12 +144,12 @@ export const RoleSelection = () => {
                                     </label>
                                     <div className="relative">
                                         <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-textSecondary dark:text-textSecondary-dark" />
-                                        <input
+                                        <Input
                                             type="password"
                                             id="password"
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
-                                            className="w-full pr-10 pl-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-surface dark:bg-surface-dark focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                            className="w-full pr-10 pl-4 py-3"
                                             placeholder="أدخل كلمة المرور"
                                             required
                                             disabled={loading}

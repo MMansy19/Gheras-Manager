@@ -10,6 +10,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import './index.css';
 
 // Lazy load pages for better code splitting
+const WelcomePage = lazy(() => import('./pages/WelcomePage').then(module => ({ default: module.WelcomePage })));
 const RoleSelection = lazy(() => import('./pages/RoleSelection').then(module => ({ default: module.RoleSelection })));
 const Home = lazy(() => import('./pages/Home').then(module => ({ default: module.Home })));
 const AppLayout = lazy(() => import('./layouts/AppLayout').then(module => ({ default: module.AppLayout })));
@@ -17,6 +18,7 @@ const ProjectDashboard = lazy(() => import('./pages/ProjectDashboard').then(modu
 const UsersManagement = lazy(() => import('./pages/UsersManagement').then(module => ({ default: module.UsersManagement })));
 const Statistics = lazy(() => import('./pages/Statistics').then(module => ({ default: module.Statistics })));
 const Profile = lazy(() => import('./pages/Profile').then(module => ({ default: module.Profile })));
+const CourseManagement = lazy(() => import('./pages/CourseManagement').then(module => ({ default: module.CourseManagement })));
 
 // Create a client
 const queryClient = new QueryClient({
@@ -38,8 +40,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                     <BrowserRouter>
                         <Suspense fallback={<LoadingSpinner message="جاري التحميل..." />}>
                             <Routes>
-                                <Route path="/" element={<Navigate to="/select-role" replace />} />
-                                <Route path="/select-role" element={<RoleSelection />} />
+                                <Route path="/" element={<WelcomePage />} />
+                                <Route path="/admin/select-role" element={<RoleSelection />} />
                                 <Route path="/app" element={
                                     <ProtectedRoute>
                                         <AppLayout />
@@ -50,8 +52,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                                     <Route path="profile" element={<Profile />} />
                                     <Route path="users" element={<UsersManagement />} />
                                     <Route path="stats" element={<Statistics />} />
+                                    <Route path="courses" element={<CourseManagement />} />
                                 </Route>
-                                <Route path="*" element={<Navigate to="/select-role" replace />} />
+                                <Route path="*" element={<Navigate to="/" replace />} />
                             </Routes>
                         </Suspense>
                     </BrowserRouter>

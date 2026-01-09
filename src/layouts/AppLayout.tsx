@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useEffect, useState } from 'react';
-import { AlertTriangle, Moon, Sun, Users, BarChart3, LogOut, User, Menu, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { AlertTriangle, Moon, Sun, Users, BarChart3, LogOut, User, Menu, X, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
 
 export const AppLayout = () => {
     const navigate = useNavigate();
@@ -57,7 +57,7 @@ export const AppLayout = () => {
 
     const handleLogout = () => {
         logout();
-        navigate('/select-role', { replace: true });
+        navigate('/admin/select-role', { replace: true });
     };
 
     const isAdminOrSupervisor = role === 'admin' || role === 'supervisor';
@@ -230,6 +230,25 @@ export const AppLayout = () => {
                                     <span className={`flex-1 ${sidebarCollapsed ? 'md:hidden' : ''
                                         }`}>الإحصائيات</span>
                                 </Link>
+                                {role === 'admin' && (
+                                    <Link
+                                        to="/app/courses"
+                                        className={`
+                                            flex items-center gap-3 px-4 py-3 rounded-md transition-colors text-right
+                                            ${isActiveLink('/app/courses')
+                                                ? 'bg-primary/10 text-primary font-medium'
+                                                : 'text-textPrimary dark:text-textPrimary-dark hover:bg-gray-100 dark:hover:bg-gray-800'
+                                            }
+                                            ${sidebarCollapsed ? 'md:justify-center' : ''}
+                                        `}
+                                        onClick={() => setSidebarOpen(false)}
+                                        title={sidebarCollapsed ? 'إدارة الدورات' : ''}
+                                    >
+                                        <Calendar className="w-5 h-5 flex-shrink-0" />
+                                        <span className={`flex-1 ${sidebarCollapsed ? 'md:hidden' : ''
+                                            }`}>إدارة الدورات</span>
+                                    </Link>
+                                )}
                             </nav>
                         </>
                     )}

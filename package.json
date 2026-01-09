@@ -17,11 +17,15 @@
     "@radix-ui/react-popover": "^1.0.7",
     "@radix-ui/react-select": "^2.0.0",
     "@radix-ui/react-slot": "^1.0.2",
+    "@supabase/supabase-js": "^2.90.1",
     "@tanstack/react-query": "^5.18.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "date-fns": "^3.0.6",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.0.0",
     "lucide-react": "^0.294.0",
+    "luxon": "^3.4.4",
     "react": "^18.2.0",
     "react-day-picker": "^8.10.0",
     "react-dom": "^18.2.0",
@@ -30,8 +34,7 @@
     "react-router-dom": "^6.21.3",
     "recharts": "^2.10.4",
     "tailwind-merge": "^2.2.0",
-    "zod": "^3.22.4",
-    "luxon": "^3.4.4"
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.10",

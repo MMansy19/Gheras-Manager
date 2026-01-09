@@ -279,3 +279,76 @@ export const PRIORITY_COLORS: Record<TaskPriority, string> = {
   medium: PRIORITY_CONFIG.medium.bgClass,
   normal: PRIORITY_CONFIG.normal.bgClass,
 };
+
+// ==================== COURSE ENROLLMENT TYPES ====================
+
+// Course Schema
+export const CourseSchema = z.object({
+  id: z.number(),
+  start_date: z.string(),
+  end_date: z.string(),
+  active: z.boolean().default(true),
+  created_at: z.string().optional(),
+  created_by: z.number().nullable().optional(),
+});
+
+export type Course = z.infer<typeof CourseSchema>;
+
+// Course Enrollment Schema
+export const EnrollmentSchema = z.object({
+  id: z.number(),
+  user_id: z.string(),
+  course_id: z.number(),
+  full_name: z.string().min(3, 'الاسم الكامل يجب أن يكون 3 أحرف على الأقل'),
+  email: z.string().email('البريد الإلكتروني غير صالح'),
+  created_at: z.string().optional(),
+});
+
+export type Enrollment = z.infer<typeof EnrollmentSchema>;
+
+// Daily Attendance Schema
+export const DailyAttendanceSchema = z.object({
+  id: z.number(),
+  enrollment_id: z.number(),
+  day_number: z.number().min(1).max(10),
+  signed_at: z.string(),
+});
+
+export type DailyAttendance = z.infer<typeof DailyAttendanceSchema>;
+
+// Course Registration Input Schema (for new users on Day 1)
+export const CourseRegistrationSchema = z.object({
+  full_name: z.string().min(3, 'الاسم الكامل يجب أن يكون 3 أحرف على الأقل'),
+  email: z.string().email('البريد الإلكتروني غير صالح'),
+  password: z.string().min(8, 'كلمة المرور يجب أن تكون 8 أحرف على الأقل'),
+  confirm_password: z.string(),
+}).refine((data) => data.password === data.confirm_password, {
+  message: 'كلمات المرور غير متطابقة',
+  path: ['confirm_password'],
+});
+
+export type CourseRegistrationInput = z.infer<typeof CourseRegistrationSchema>;
+
+// Course Login Input Schema (for Days 2-10)
+export const CourseLoginSchema = z.object({
+  email: z.string().email('البريد الإلكتروني غير صالح'),
+  password: z.string().min(1, 'كلمة المرور مطلوبة'),
+});
+
+export type CourseLoginInput = z.infer<typeof CourseLoginSchema>;
+
+// Create Course Input Schema (for admin)
+export const CreateCourseSchema = z.object({
+  start_date: z.string(),
+  created_by: z.number().optional(),
+});
+
+export type CreateCourseInput = z.infer<typeof CreateCourseSchema>;
+
+// Enrollment with Attendance Details
+export interface EnrollmentWithAttendance extends Enrollment {
+  attendance_days: number[];
+  attendance_count: number;
+  is_complete: boolean;
+}
+
