@@ -103,17 +103,30 @@ export const CourseLoginForm = ({ courseId, onCertificateReady }: CourseLoginFor
 
             // Check if any attendance was today
             if (existingEnrollments && existingEnrollments.length > 0) {
-                const today = new Date().toISOString().split('T')[0];
-                const hasLoggedInToday = existingEnrollments.some((enrollment: any) => {
-                    return enrollment.daily_attendances?.some((att: any) => {
-                        const signedDate = new Date(att.signed_at).toISOString().split('T')[0];
-                        return signedDate === today;
+                // First check if they have completed all 10 days
+                const enrollment = existingEnrollments[0];
+                const { data: allAttendances } = await supabase
+                    .from('daily_attendances')
+                    .select('*')
+                    .eq('enrollment_id', enrollment.id);
+                
+                const hasCompletedAll10Days = allAttendances && allAttendances.length >= 10;
+                
+                // If they completed all 10 days, let them through to see certificate
+                if (!hasCompletedAll10Days) {
+                    // Only check for today's login if they haven't completed the course
+                    const today = new Date().toISOString().split('T')[0];
+                    const hasLoggedInToday = existingEnrollments.some((enrollment: any) => {
+                        return enrollment.daily_attendances?.some((att: any) => {
+                            const signedDate = new Date(att.signed_at).toISOString().split('T')[0];
+                            return signedDate === today;
+                        });
                     });
-                });
 
-                if (hasLoggedInToday) {
-                    setError('لقد قمت بتسجيل الحضور اليوم بالفعل');
-                    return;
+                    if (hasLoggedInToday) {
+                        setError('لقد قمت بتسجيل الحضور اليوم بالفعل');
+                        return;
+                    }
                 }
             }
 
@@ -266,19 +279,22 @@ export const CourseLoginForm = ({ courseId, onCertificateReady }: CourseLoginFor
             ) : (
                 /* Success State - Show Attendance Progress */
                 <div className="space-y-4">
-                    <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                        <div className="flex items-center gap-3 mb-3">
-                            <Check className="w-6 h-6 text-green-600 dark:text-green-400" />
-                            <div>
-                                <h3 className="font-bold text-green-800 dark:text-green-300">
-                                    {signedToday ? 'تم تسجيل حضورك اليوم!' : 'مرحباً بك'}
-                                </h3>
-                                <p className="text-sm text-green-700 dark:text-green-400">
-                                    {enrollment.full_name}
-                                </p>
+                    {/* Only show success message if NOT on the last day OR not complete */}
+                    {(!isComplete || currentDay !== 10) && (
+                        <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                            <div className="flex items-center gap-3 mb-3">
+                                <Check className="w-6 h-6 text-green-600 dark:text-green-400" />
+                                <div>
+                                    <h3 className="font-bold text-green-800 dark:text-green-300">
+                                        {signedToday ? 'تم تسجيل حضورك اليوم!' : 'مرحباً بك'}
+                                    </h3>
+                                    <p className="text-sm text-green-700 dark:text-green-400">
+                                        {enrollment.full_name}
+                                    </p>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* Attendance Grid */}
                     <div className="card">

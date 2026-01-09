@@ -1,4 +1,6 @@
 import jsPDF from 'jspdf';
+import { processArabicText } from './arabicTextHelper';
+import { addCairoFont } from './cairoFont';
 
 /**
  * Generate and download a certificate PDF for course completion
@@ -12,6 +14,9 @@ export const generateCertificate = async (fullName: string): Promise<void> => {
             unit: 'mm',
             format: 'a4',
         });
+
+        // Load Arabic font support
+        await addCairoFont(pdf);
 
         const pageWidth = pdf.internal.pageSize.getWidth();
         const pageHeight = pdf.internal.pageSize.getHeight();
@@ -29,50 +34,72 @@ export const generateCertificate = async (fullName: string): Promise<void> => {
         pdf.setLineWidth(0.5);
         pdf.rect(15, 15, pageWidth - 30, pageHeight - 30);
 
-        // Title - "شهادة إتمام"
+        // Add logo at the top center
+        try {
+            const logoImg = new Image();
+            logoImg.src = '/logo.png';
+            await new Promise((resolve, reject) => {
+                logoImg.onload = resolve;
+                logoImg.onerror = reject;
+            });
+            
+            // Add logo (25mm width, maintain aspect ratio)
+            const logoWidth = 25;
+            const logoHeight = 25; // Adjust based on your logo's aspect ratio
+            pdf.addImage(logoImg, 'PNG', (pageWidth - logoWidth) / 2, 20, logoWidth, logoHeight);
+        } catch (error) {
+            console.error('Error loading logo:', error);
+            // Continue without logo if it fails to load
+        }
+
+        // Title - "شهادة إتمام" (moved down to accommodate logo)
         pdf.setTextColor(5, 150, 105); // primary color
         pdf.setFontSize(32);
-        // Note: jsPDF doesn't support Arabic out of the box
-        // For production, you'd need to add Arabic font support
-        // Using English placeholder for now
-        pdf.text('Certificate of Completion', pageWidth / 2, 40, { align: 'center' });
+        pdf.text('Certificate of Completion', pageWidth / 2, 55, { align: 'center' });
 
         pdf.setFontSize(28);
-        pdf.text('شهادة إتمام', pageWidth / 2, 50, { align: 'center' });
+        const titleAr = processArabicText('شهادة إتمام');
+        pdf.text(titleAr, pageWidth / 2, 65, { align: 'center' });
 
         // Decorative line
         pdf.setDrawColor(5, 150, 105);
         pdf.setLineWidth(0.5);
-        pdf.line(pageWidth / 2 - 40, 55, pageWidth / 2 + 40, 55);
+        pdf.line(pageWidth / 2 - 40, 70, pageWidth / 2 + 40, 70);
 
         // "This is to certify that" text
         pdf.setTextColor(71, 85, 105); // gray-600
         pdf.setFontSize(16);
-        pdf.text('هذا يشهد بأن', pageWidth / 2, 75, { align: 'center' });
+        const certifyText = processArabicText('هذا يشهد بأن');
+        pdf.text(certifyText, pageWidth / 2, 85, { align: 'center' });
 
         // Student name (highlighted)
         pdf.setTextColor(5, 150, 105); // primary
         pdf.setFontSize(24);
-        pdf.text(fullName, pageWidth / 2, 90, { align: 'center' });
+        const processedName = processArabicText(fullName);
+        pdf.text(processedName, pageWidth / 2, 100, { align: 'center' });
 
         // Description
         pdf.setTextColor(51, 65, 85); // slate-700
         pdf.setFontSize(16);
-        pdf.text('قد أكمل بنجاح', pageWidth / 2, 105, { align: 'center' });
+        const completedText = processArabicText('قد أكمل بنجاح');
+        pdf.text(completedText, pageWidth / 2, 115, { align: 'center' });
 
         // Course name
         pdf.setFontSize(20);
         pdf.setTextColor(5, 150, 105);
-        pdf.text('دورة غراس لمدة 10 أيام', pageWidth / 2, 120, { align: 'center' });
+        const courseName = processArabicText('دورة غراس لمدة 10 أيام');
+        pdf.text(courseName, pageWidth / 2, 130, { align: 'center' });
 
         // Organization
         pdf.setFontSize(16);
         pdf.setTextColor(71, 85, 105);
-        pdf.text('أكاديمية غراس العلم', pageWidth / 2, 135, { align: 'center' });
+        const orgName = processArabicText('أكاديمية غراس للعلم');
+        pdf.text(orgName, pageWidth / 2, 145, { align: 'center' });
 
         // Attendance note
         pdf.setFontSize(14);
-        pdf.text('بحضور كامل لجميع الأيام العشرة', pageWidth / 2, 145, { align: 'center' });
+        const attendanceNote = processArabicText('بحضور كامل لجميع الأيام العشرة');
+        pdf.text(attendanceNote, pageWidth / 2, 155, { align: 'center' });
 
         // Date
         const currentDate = new Date().toLocaleDateString('ar-SA', {
@@ -82,20 +109,23 @@ export const generateCertificate = async (fullName: string): Promise<void> => {
         });
         pdf.setFontSize(12);
         pdf.setTextColor(100, 116, 139); // slate-500
-        pdf.text(`تاريخ الإصدار: ${currentDate}`, pageWidth / 2, 165, { align: 'center' });
+        const dateText = processArabicText(`تاريخ الإصدار: ${currentDate}`);
+        pdf.text(dateText, pageWidth / 2, 165, { align: 'center' });
 
         // Signature area
         pdf.setLineWidth(0.3);
         pdf.line(40, 180, 90, 180); // Signature line
         pdf.setFontSize(10);
-        pdf.text('التوقيع', 65, 186, { align: 'center' });
+        const signatureLabel = processArabicText('التوقيع');
+        pdf.text(signatureLabel, 65, 186, { align: 'center' });
 
         // Seal/Badge placeholder (circle)
         pdf.setFillColor(5, 150, 105);
         pdf.circle(pageWidth - 40, pageHeight - 40, 15, 'F');
         pdf.setTextColor(255, 255, 255);
         pdf.setFontSize(10);
-        pdf.text('غراس', pageWidth - 40, pageHeight - 38, { align: 'center' });
+        const sealText = processArabicText('غراس');
+        pdf.text(sealText, pageWidth - 40, pageHeight - 38, { align: 'center' });
 
         // Footer
         pdf.setTextColor(148, 163, 184); // slate-400
@@ -103,7 +133,8 @@ export const generateCertificate = async (fullName: string): Promise<void> => {
         pdf.text('www.ghras.academy', pageWidth / 2, pageHeight - 15, { align: 'center' });
 
         // Download the PDF
-        const fileName = `غراس_شهادة_${fullName.replace(/\s+/g, '_')}_${Date.now()}.pdf`;
+        const processedFileName = processArabicText(fullName.replace(/\s+/g, '_'));
+        const fileName = `Ghras_Certificate_${processedFileName}_${Date.now()}.pdf`;
         pdf.save(fileName);
     } catch (error) {
         console.error('Error generating certificate:', error);
