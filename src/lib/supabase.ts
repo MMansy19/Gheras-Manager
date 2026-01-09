@@ -22,6 +22,7 @@ export type Database = {
             courses: {
                 Row: {
                     id: number;
+                    title: string;
                     start_date: string;
                     end_date: string;
                     active: boolean;
@@ -29,12 +30,14 @@ export type Database = {
                     created_by?: number;
                 };
                 Insert: {
+                    title: string;
                     start_date: string;
                     end_date: string;
                     active?: boolean;
                     created_by?: number;
                 };
                 Update: {
+                    title?: string;
                     start_date?: string;
                     end_date?: string;
                     active?: boolean;

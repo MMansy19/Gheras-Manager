@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { createEnrollment, getActiveCourse } from '../api/courseApi';
+import { createEnrollment, getCourseById } from '../api/courseApi';
 import { CourseRegistrationInput, CourseRegistrationSchema } from '../types';
 import { UserPlus, Mail, Lock, User } from 'lucide-react';
 import { Input } from './ui/input';
@@ -8,10 +8,11 @@ import { Label } from './ui/label';
 import { Button } from './ui/button';
 
 interface CourseRegistrationFormProps {
+    courseId: number;
     onSuccess: () => void;
 }
 
-export const CourseRegistrationForm = ({ onSuccess }: CourseRegistrationFormProps) => {
+export const CourseRegistrationForm = ({ courseId, onSuccess }: CourseRegistrationFormProps) => {
     const [formData, setFormData] = useState<CourseRegistrationInput>({
         full_name: '',
         email: '',
@@ -38,10 +39,10 @@ export const CourseRegistrationForm = ({ onSuccess }: CourseRegistrationFormProp
             // Validate form data
             const validated = CourseRegistrationSchema.parse(formData);
 
-            // Get active course
-            const activeCourse = await getActiveCourse();
-            if (!activeCourse) {
-                setError('لا توجد دورة نشطة حالياً');
+            // Get course by ID
+            const course = await getCourseById(courseId);
+            if (!course) {
+                setError('لا توجد دورة بهذا المعرف');
                 return;
             }
 
@@ -73,7 +74,7 @@ export const CourseRegistrationForm = ({ onSuccess }: CourseRegistrationFormProp
             // Create enrollment record
             await createEnrollment(
                 authData.user.id,
-                activeCourse.id,
+                course.id,
                 validated.full_name,
                 validated.email
             );

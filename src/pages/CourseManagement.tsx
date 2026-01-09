@@ -7,19 +7,30 @@ import {
     getEnrollmentsWithAttendance,
     getCourseStats,
     deactivateCourse,
+    updateCourse,
 } from '../api/courseApi';
-import { CreateCourseInput } from '../types';
+import { CreateCourseInput, UpdateCourseInput, Course } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
-import { Calendar, Plus, Users, Award, Check, TrendingUp } from 'lucide-react';
+import { Calendar, Plus, Users, Award, Check, TrendingUp, Edit2 } from 'lucide-react';
 import { DatePicker } from '../components/ui/date-picker';
 import { Button } from '../components/ui/button';
-import { Label } from '@/components/ui/label';
+import { Label } from '../components/ui/label';
+import { Input } from '../components/ui/input';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 export const CourseManagement = () => {
     const queryClient = useQueryClient();
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
     const [startDate, setStartDate] = useState<Date | undefined>(new Date());
+    const [courseTitle, setCourseTitle] = useState('دورة غراس لمدة 10 أيام');
+    const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+    const [editTitle, setEditTitle] = useState('');
+    const [editStartDate, setEditStartDate] = useState<Date | undefined>();
+    const [confirmDialog, setConfirmDialog] = useState<{
+        isOpen: boolean;
+        courseId: number | null;
+    }>({ isOpen: false, courseId: null });
 
     const { data: courses, isLoading: coursesLoading } = useQuery({
         queryKey: ['courses'],
@@ -50,6 +61,17 @@ export const CourseManagement = () => {
             queryClient.invalidateQueries({ queryKey: ['activeCourse'] });
             setShowCreateForm(false);
             setStartDate(new Date());
+            setCourseTitle('دورة غراس لمدة 10 أيام');
+        },
+    });
+
+    const updateCourseMutation = useMutation({
+        mutationFn: ({ courseId, input }: { courseId: number; input: UpdateCourseInput }) =>
+            updateCourse(courseId, input),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['courses'] });
+            queryClient.invalidateQueries({ queryKey: ['activeCourse'] });
+            setEditingCourse(null);
         },
     });
 
@@ -68,13 +90,44 @@ export const CourseManagement = () => {
     }, [activeCourse]);
 
     const handleCreateCourse = async () => {
-        if (!startDate) return;
+        if (!startDate || !courseTitle.trim()) return;
 
         const input: CreateCourseInput = {
+            title: courseTitle,
             start_date: startDate.toISOString().split('T')[0],
         };
 
         createCourseMutation.mutate(input);
+    };
+
+    const handleEditCourse = (course: Course) => {
+        setEditingCourse(course);
+        setEditTitle(course.title);
+        setEditStartDate(new Date(course.start_date));
+    };
+
+    const handleUpdateCourse = async () => {
+        if (!editingCourse || !editTitle.trim()) return;
+
+        const input: UpdateCourseInput = {
+            title: editTitle,
+        };
+
+        if (editStartDate) {
+            input.start_date = editStartDate.toISOString().split('T')[0];
+        }
+
+        updateCourseMutation.mutate({
+            courseId: editingCourse.id,
+            input,
+        });
+    };
+
+    const handleDeactivateCourse = () => {
+        if (confirmDialog.courseId) {
+            deactivateCourseMutation.mutate(confirmDialog.courseId);
+            setConfirmDialog({ isOpen: false, courseId: null });
+        }
     };
 
     const formatDate = (dateString: string) => {
@@ -114,6 +167,17 @@ export const CourseManagement = () => {
                     <h3 className="text-xl font-bold mb-4">إنشاء دورة جديدة</h3>
                     <div className="space-y-4">
                         <div>
+                            <Label htmlFor="course-title">
+                                عنوان الدورة
+                            </Label>
+                            <Input
+                                id="course-title"
+                                value={courseTitle}
+                                onChange={(e) => setCourseTitle(e.target.value)}
+                                placeholder="دورة غراس لمدة 10 أيام"
+                            />
+                        </div>
+                        <div>
                             <Label htmlFor="start-date">
                                 تاريخ بداية الدورة
                             </Label>
@@ -129,7 +193,7 @@ export const CourseManagement = () => {
                         <div className="flex gap-3">
                             <Button
                                 onClick={handleCreateCourse}
-                                disabled={!startDate || createCourseMutation.isPending}
+                                disabled={!startDate || !courseTitle.trim() || createCourseMutation.isPending}
                             >
                                 {createCourseMutation.isPending ? 'جاري الإنشاء...' : 'إنشاء الدورة'}
                             </Button>
@@ -150,13 +214,76 @@ export const CourseManagement = () => {
                 </div>
             )}
 
+            {/* Edit Course Form */}
+            {editingCourse && (
+                <div className="card">
+                    <h3 className="text-xl font-bold mb-4">تعديل الدورة</h3>
+                    <div className="space-y-4">
+                        <div>
+                            <Label htmlFor="edit-course-title">
+                                عنوان الدورة
+                            </Label>
+                            <Input
+                                id="edit-course-title"
+                                value={editTitle}
+                                onChange={(e) => setEditTitle(e.target.value)}
+                                placeholder="دورة غراس لمدة 10 أيام"
+                            />
+                        </div>
+                        <div>
+                            <Label htmlFor="edit-start-date">
+                                تاريخ بداية الدورة
+                            </Label>
+                            <DatePicker
+                                value={editStartDate?.toISOString().split('T')[0] || ''}
+                                onChange={(dateString) => setEditStartDate(dateString ? new Date(dateString) : undefined)}
+                            />
+                            <p className="text-sm text-textSecondary dark:text-textSecondary-dark mt-1">
+                                سيتم تحديث تاريخ النهاية تلقائياً (+9 أيام)
+                            </p>
+                        </div>
+
+                        <div className="flex gap-3">
+                            <Button
+                                onClick={handleUpdateCourse}
+                                disabled={!editTitle.trim() || updateCourseMutation.isPending}
+                            >
+                                {updateCourseMutation.isPending ? 'جاري التحديث...' : 'حفظ التغييرات'}
+                            </Button>
+                            <Button
+                                onClick={() => setEditingCourse(null)}
+                                variant="secondary"
+                            >
+                                إلغاء
+                            </Button>
+                        </div>
+
+                        {updateCourseMutation.isError && (
+                            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm">
+                                حدث خطأ في تحديث الدورة
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
             {/* Active Course Overview */}
-            {activeCourse && (
+            {activeCourse && !editingCourse && (
                 <div className="card bg-gradient-to-br from-primary-50 to-green-50 dark:from-primary-900/30 dark:to-green-900/30 border-primary">
                     <div className="flex items-start justify-between mb-4">
-                        <div>
-                            <h3 className="text-xl font-bold text-primary">الدورة النشطة</h3>
-                            <p className="text-sm text-textSecondary dark:text-textSecondary-dark mt-1">
+                        <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                                <h3 className="text-xl font-bold text-primary">{activeCourse.title}</h3>
+                                <Button
+                                    onClick={() => handleEditCourse(activeCourse)}
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-primary"
+                                >
+                                    <Edit2 className="w-4 h-4" />
+                                </Button>
+                            </div>
+                            <p className="text-sm text-textSecondary dark:text-textSecondary-dark">
                                 {formatDate(activeCourse.start_date)} - {formatDate(activeCourse.end_date)}
                             </p>
                         </div>
@@ -329,9 +456,7 @@ export const CourseManagement = () => {
                                             <Button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    if (confirm('هل تريد إلغاء تفعيل هذه الدورة؟')) {
-                                                        deactivateCourseMutation.mutate(course.id);
-                                                    }
+                                                    setConfirmDialog({ isOpen: true, courseId: course.id });
                                                 }}
                                                 variant="destructive"
                                                 size="sm"
@@ -346,6 +471,18 @@ export const CourseManagement = () => {
                     </div>
                 </div>
             )}
+
+            {/* Confirm Dialog */}
+            <ConfirmDialog
+                isOpen={confirmDialog.isOpen}
+                onClose={() => setConfirmDialog({ isOpen: false, courseId: null })}
+                onConfirm={handleDeactivateCourse}
+                title="إلغاء تفعيل الدورة"
+                message="هل أنت متأكد من إلغاء تفعيل هذه الدورة؟ لن يتمكن الطلاب من التسجيل أو تسجيل الحضور بعد ذلك."
+                confirmText="إلغاء التفعيل"
+                cancelText="إلغاء"
+                variant="danger"
+            />
         </div>
     );
 };

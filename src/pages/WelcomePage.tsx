@@ -2,16 +2,17 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CourseRegistrationForm } from '../components/CourseRegistrationForm';
 import { CourseLoginForm } from '../components/CourseLoginForm';
-import { getActiveCourse, isRegistrationDay, getCurrentDayNumber } from '../api/courseApi';
+import { getActiveCourses, isRegistrationDay, getCurrentDayNumber } from '../api/courseApi';
 import { generateCertificate } from '../lib/certificateGenerator';
 import { LoadingSpinner } from '../components/LoadingSpinner';
-import { Award, Calendar, ArrowLeft } from 'lucide-react';
+import { Award, Calendar, ArrowLeft, BookOpen } from 'lucide-react';
 import { Course } from '../types';
 import { Button } from '../components/ui/button';
 
 export const WelcomePage = () => {
     const navigate = useNavigate();
-    const [activeCourse, setActiveCourse] = useState<Course | null>(null);
+    const [courses, setCourses] = useState<Course[]>([]);
+    const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
     const [isRegistration, setIsRegistration] = useState(false);
     const [currentDay, setCurrentDay] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
@@ -29,21 +30,28 @@ export const WelcomePage = () => {
     const loadCourseData = async () => {
         try {
             setLoading(true);
-            const course = await getActiveCourse();
-            setActiveCourse(course);
-
-            if (course) {
-                const isDay1 = await isRegistrationDay();
-                setIsRegistration(isDay1);
-
-                const day = await getCurrentDayNumber();
-                setCurrentDay(day);
+            const activeCourses = await getActiveCourses();
+            setCourses(activeCourses);
+            
+            // Auto-select first course if only one
+            if (activeCourses.length === 1) {
+                handleCourseSelect(activeCourses[0]);
             }
         } catch (err) {
             console.error('Error loading course data:', err);
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleCourseSelect = async (course: Course) => {
+        setSelectedCourse(course);
+        
+        const isDay1 = await isRegistrationDay(course.id);
+        setIsRegistration(isDay1);
+
+        const day = await getCurrentDayNumber(course.id);
+        setCurrentDay(day);
     };
 
     const handleRegistrationSuccess = () => {
@@ -70,6 +78,14 @@ export const WelcomePage = () => {
         } finally {
             setDownloadingCert(false);
         }
+    };
+
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleDateString('ar-SA', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+        });
     };
 
     if (loading) {
@@ -105,15 +121,20 @@ export const WelcomePage = () => {
                     </div>
 
                     <h1 className="text-3xl md:text-4xl font-black mb-3 text-primary drop-shadow-md">
-                        دورة غراس لمدة 10 أيام
+                        {selectedCourse?.title || 'دورة غراس لمدة 10 أيام'}
                     </h1>
                     <p className="text-base text-textSecondary dark:text-textSecondary-dark font-semibold">
                         أكاديمية غراس العلم
                     </p>
+                    {selectedCourse && (
+                        <p className="text-sm text-textSecondary dark:text-textSecondary-dark mt-2">
+                            {formatDate(selectedCourse.start_date)} - {formatDate(selectedCourse.end_date)}
+                        </p>
+                    )}
                 </div>
 
                 {/* Main Content */}
-                {!activeCourse ? (
+                {courses.length === 0 ? (
                     /* No Active Course */
                     <div className="card text-center">
                         <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-400" />
@@ -164,6 +185,44 @@ export const WelcomePage = () => {
                             الدخول كمسؤول
                         </Button>
                     </div>
+                ) : !selectedCourse ? (
+                    /* Course Selection */
+                    <div className="card">
+                        <h2 className="text-2xl font-bold mb-4 text-center">اختر الدورة</h2>
+                        <p className="text-textSecondary dark:text-textSecondary-dark text-center mb-6">
+                            يرجى اختيار الدورة للتسجيل أو تسجيل الحضور
+                        </p>
+                        <div className="space-y-3">
+                            {courses.map((course) => (
+                                <button
+                                    key={course.id}
+                                    onClick={() => handleCourseSelect(course)}
+                                    className="w-full p-4 rounded-lg border-2 border-gray-200 dark:border-gray-700 hover:border-primary hover:bg-primary/5 transition-all text-right"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <BookOpen className="w-6 h-6 text-primary flex-shrink-0" />
+                                        <div className="flex-1">
+                                            <h3 className="font-bold text-lg mb-1">{course.title}</h3>
+                                            <p className="text-sm text-textSecondary dark:text-textSecondary-dark">
+                                                {formatDate(course.start_date)} - {formatDate(course.end_date)}
+                                            </p>
+                                        </div>
+                                        <ArrowLeft className="w-5 h-5 text-primary transform rotate-180" />
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                        
+                        {/* Admin Link */}
+                        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 text-center">
+                            <button
+                                onClick={() => navigate('/admin/select-role')}
+                                className="text-sm text-textSecondary dark:text-textSecondary-dark hover:text-primary transition-colors"
+                            >
+                                الدخول كمسؤول ←
+                            </button>
+                        </div>
+                    </div>
                 ) : (
                     /* Registration or Login Form */
                     <div className="card">
@@ -181,9 +240,29 @@ export const WelcomePage = () => {
                         </h2>
 
                         {isRegistration ? (
-                            <CourseRegistrationForm onSuccess={handleRegistrationSuccess} />
+                            <CourseRegistrationForm 
+                                courseId={selectedCourse.id} 
+                                onSuccess={handleRegistrationSuccess} 
+                            />
                         ) : (
-                            <CourseLoginForm onCertificateReady={handleCertificateReady} />
+                            <CourseLoginForm 
+                                courseId={selectedCourse.id} 
+                                onCertificateReady={handleCertificateReady} 
+                            />
+                        )}
+
+                        {/* Back to Course Selection */}
+                        {courses.length > 1 && (
+                            <div className="mt-4">
+                                <Button
+                                    onClick={() => setSelectedCourse(null)}
+                                    variant="outline"
+                                    className="w-full"
+                                    size="sm"
+                                >
+                                    ← العودة لاختيار الدورة
+                                </Button>
+                            </div>
                         )}
 
                         {/* Admin Link */}

@@ -7,6 +7,7 @@ import {
     DailyAttendance,
     DailyAttendanceSchema,
     CreateCourseInput,
+    UpdateCourseInput,
     EnrollmentWithAttendance,
 } from '../types';
 
@@ -23,6 +24,7 @@ export const createCourse = async (input: CreateCourseInput): Promise<Course> =>
     const { data, error } = await supabase
         .from('courses')
         .insert({
+            title: input.title,
             start_date: input.start_date,
             end_date: endDate.toISOString().split('T')[0],
             active: true,
@@ -54,7 +56,37 @@ export const getActiveCourse = async (): Promise<Course | null> => {
 
     return data ? CourseSchema.parse(data) : null;
 };
+/**
+ * Get all active courses
+ */
+export const getActiveCourses = async (): Promise<Course[]> => {
+    const { data, error } = await supabase
+        .from('courses')
+        .select('*')
+        .eq('active', true)
+        .order('start_date', { ascending: false });
 
+    if (error) throw new Error(`فشل جلب الدورات النشطة: ${error.message}`);
+    return data.map((course: any) => CourseSchema.parse(course));
+};
+
+/**
+ * Get course by ID
+ */
+export const getCourseById = async (courseId: number): Promise<Course | null> => {
+    const { data, error } = await supabase
+        .from('courses')
+        .select('*')
+        .eq('id', courseId)
+        .single();
+
+    if (error) {
+        if (error.code === 'PGRST116') return null;
+        throw new Error(`فشل جلب الدورة: ${error.message}`);
+    }
+
+    return CourseSchema.parse(data);
+};
 /**
  * Get all courses (for admin dashboard)
  */
@@ -81,10 +113,42 @@ export const deactivateCourse = async (courseId: number): Promise<void> => {
 };
 
 /**
+ * Update a course (title, start_date, end_date)
+ */
+export const updateCourse = async (courseId: number, input: UpdateCourseInput): Promise<Course> => {
+    // If start_date is updated, recalculate end_date
+    const updateData: any = { ...input };
+    
+    if (input.start_date && !input.end_date) {
+        const startDate = new Date(input.start_date);
+        const endDate = new Date(startDate);
+        endDate.setDate(endDate.getDate() + 9);
+        updateData.end_date = endDate.toISOString().split('T')[0];
+    }
+
+    const { data, error } = await supabase
+        .from('courses')
+        .update(updateData)
+        .eq('id', courseId)
+        .select()
+        .single();
+
+    if (error) throw new Error(`فشل تحديث الدورة: ${error.message}`);
+    return CourseSchema.parse(data);
+};
+
+/**
  * Check if today is Day 1 of the active course
  */
-export const isRegistrationDay = async (): Promise<boolean> => {
-    const course = await getActiveCourse();
+export const isRegistrationDay = async (courseId?: number): Promise<boolean> => {
+    let course: Course | null;
+    
+    if (courseId) {
+        course = await getCourseById(courseId);
+    } else {
+        course = await getActiveCourse();
+    }
+    
     if (!course) return false;
 
     const today = new Date().toISOString().split('T')[0];
@@ -95,8 +159,15 @@ export const isRegistrationDay = async (): Promise<boolean> => {
  * Get current day number (1-10) for active course
  * Returns null if no active course or outside course period
  */
-export const getCurrentDayNumber = async (): Promise<number | null> => {
-    const course = await getActiveCourse();
+export const getCurrentDayNumber = async (courseId?: number): Promise<number | null> => {
+    let course: Course | null;
+    
+    if (courseId) {
+        course = await getCourseById(courseId);
+    } else {
+        course = await getActiveCourse();
+    }
+    
     if (!course) return null;
 
     const today = new Date();

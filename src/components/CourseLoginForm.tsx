@@ -6,6 +6,7 @@ import {
     getAttendanceByEnrollment,
     getCurrentDayNumber,
     hasCompleteAttendance,
+    getCourseById,
 } from '../api/courseApi';
 import { CourseLoginInput, CourseLoginSchema, Enrollment, DailyAttendance } from '../types';
 import { LogIn, Mail, Lock, Check, Calendar } from 'lucide-react';
@@ -14,10 +15,11 @@ import { Label } from './ui/label';
 import { Button } from './ui/button';
 
 interface CourseLoginFormProps {
+    courseId: number;
     onCertificateReady: (enrollmentId: number, fullName: string) => void;
 }
 
-export const CourseLoginForm = ({ onCertificateReady }: CourseLoginFormProps) => {
+export const CourseLoginForm = ({ courseId, onCertificateReady }: CourseLoginFormProps) => {
     const [formData, setFormData] = useState<CourseLoginInput>({
         email: '',
         password: '',
@@ -32,7 +34,7 @@ export const CourseLoginForm = ({ onCertificateReady }: CourseLoginFormProps) =>
 
     useEffect(() => {
         loadCurrentDay();
-    }, []);
+    }, [courseId]);
 
     useEffect(() => {
         if (enrollment && currentDay) {
@@ -42,7 +44,7 @@ export const CourseLoginForm = ({ onCertificateReady }: CourseLoginFormProps) =>
 
     const loadCurrentDay = async () => {
         try {
-            const day = await getCurrentDayNumber();
+            const day = await getCurrentDayNumber(courseId);
             setCurrentDay(day);
         } catch (err) {
             console.error('Error loading current day:', err);
@@ -92,16 +94,15 @@ export const CourseLoginForm = ({ onCertificateReady }: CourseLoginFormProps) =>
                 return;
             }
 
-            // Get active course and user enrollment
-            const { getActiveCourse } = await import('../api/courseApi');
-            const activeCourse = await getActiveCourse();
+            // Get course and user enrollment
+            const course = await getCourseById(courseId);
 
-            if (!activeCourse) {
-                setError('لا توجد دورة نشطة حالياً');
+            if (!course) {
+                setError('لا توجد دورة بهذا المعرف');
                 return;
             }
 
-            const userEnrollment = await getEnrollmentByUser(authData.user.id, activeCourse.id);
+            const userEnrollment = await getEnrollmentByUser(authData.user.id, course.id);
 
             if (!userEnrollment) {
                 setError('لم يتم العثور على تسجيلك في الدورة');
@@ -114,7 +115,7 @@ export const CourseLoginForm = ({ onCertificateReady }: CourseLoginFormProps) =>
             setAttendances(userAttendances);
 
             // Check if already signed today
-            const day = await getCurrentDayNumber();
+            const day = await getCurrentDayNumber(courseId);
             if (!day) {
                 setError('الدورة غير نشطة حالياً');
                 return;
