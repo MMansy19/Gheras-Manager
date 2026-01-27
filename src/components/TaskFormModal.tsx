@@ -258,7 +258,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                                         user.telegram_id?.toLowerCase().includes(userSearch.toLowerCase())
                                     )
                                     .map((user) => (
-                                        <div key={user.id} className="flex items-center gap-2">
+                                        <label key={user.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors">
                                             <Checkbox
                                                 checked={formData.assignee_ids.includes(user.id)}
                                                 onCheckedChange={(checked) => {
@@ -275,10 +275,10 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                                                     }
                                                 }}
                                             />
-                                            <span className="text-sm">
+                                            <span className="text-sm select-none">
                                                 {user.name} ({user.telegram_id})
                                             </span>
-                                        </div>
+                                        </label>
                                     ))}
                             </div>
                             {formData.assignee_ids.length > 0 && (
