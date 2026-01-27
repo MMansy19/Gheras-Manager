@@ -24,9 +24,6 @@ dist-ssr
 *.sw?
 
 # Environment variables
-.env
-.env.local
-.env.production
 
 # Test coverage
 coverage
@@ -35,6 +32,6 @@ coverage
 build
 docs
 .vscode
-.env.*
 library
 
+config.bat
