@@ -62,7 +62,7 @@ export const TaskSchema = z.object({
   priority: TaskPrioritySchema.default('normal'),
   due_date: z.string().nullable().optional(),
   team_id: z.number(),
-  assignee_id: z.number().nullable().optional(),
+  assignee_ids: z.array(z.number()).default([]),
   created_by: z.number(),
   started_at: z.string().nullable().optional(),
   completed_at: z.string().nullable().optional(),
@@ -80,9 +80,9 @@ export const CreateTaskSchema = TaskSchema.pick({
   priority: true,
   due_date: true,
   team_id: true,
-  assignee_id: true,
+  assignee_ids: true,
   work_hours: true,
-}).partial({ description: true, due_date: true, assignee_id: true, work_hours: true });
+}).partial({ description: true, due_date: true, assignee_ids: true, work_hours: true });
 
 export type CreateTaskInput = z.infer<typeof CreateTaskSchema>;
 

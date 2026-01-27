@@ -115,17 +115,16 @@ export const TaskTableView: React.FC<TaskTableViewProps> = ({
                             <span className="font-semibold">{task.title}</span>
                         </TableCell>
                         <TableCell className="min-w-[120px] md:min-w-[180px]">
-                            {task.assignee_id ? (
-                                task.assignee_id === currentUserId ? (
-                                    <TableAvatar 
-                                        name={getUserName(task.assignee_id)} 
-                                        highlight 
-                                    />
-                                ) : (
-                                    <TableAvatar 
-                                        name={getUserName(task.assignee_id)} 
-                                    />
-                                )
+                            {task.assignee_ids && task.assignee_ids.length > 0 ? (
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    {task.assignee_ids.map((assigneeId) => (
+                                        <TableAvatar
+                                            key={assigneeId}
+                                            name={getUserName(assigneeId)}
+                                            highlight={assigneeId === currentUserId}
+                                        />
+                                    ))}
+                                </div>
                             ) : (
                                 <span className="text-sm text-gray-400">غير مُعين</span>
                             )}
@@ -198,7 +197,7 @@ export const TaskTableView: React.FC<TaskTableViewProps> = ({
 
                         {(() => {
                             const task = tasks.find(t => t.id === openMenuId);
-                            return (role !== 'volunteer' || task?.assignee_id === currentUserId) && (
+                            return (role !== 'volunteer' || task?.assignee_ids?.includes(currentUserId!)) && (
                                 <button
                                     onClick={() => {
                                         if (task) onEditTask(task);
@@ -244,6 +243,7 @@ interface TaskDetailsModalProps {
     users?: User[];
     canLinkTasks?: boolean;
     onViewTask?: (task: Task) => void;
+    currentUserId?: number | null;
 }
 
 export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
@@ -253,6 +253,7 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
     users,
     canLinkTasks = true,
     onViewTask = () => { },
+    currentUserId,
 }) => {
     const [isLinkingOpen, setIsLinkingOpen] = useState(false);
 
@@ -321,10 +322,26 @@ export const TaskDetailsModal: React.FC<TaskDetailsModalProps> = ({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <h4 className="font-bold mb-1">المسؤول:</h4>
-                        <p className="text-textSecondary dark:text-textSecondary-dark">
-                            {getUserName(task.assignee_id)}
-                        </p>
+                        <h4 className="font-bold mb-1">المسؤولون:</h4>
+                        <div className="flex flex-wrap gap-2">
+                            {task.assignee_ids && task.assignee_ids.length > 0 ? (
+                                task.assignee_ids.map((assigneeId) => (
+                                    <span
+                                        key={assigneeId}
+                                        className={`px-2 py-1 rounded-full text-xs ${
+                                            assigneeId === currentUserId
+                                                ? 'bg-primary/10 text-primary border border-primary/30'
+                                                : 'bg-gray-100 dark:bg-gray-700 text-textSecondary dark:text-textSecondary-dark'
+                                        }`}
+                                    >
+                                        {getUserName(assigneeId)}
+                                        {assigneeId === currentUserId && ' (أنت)'}
+                                    </span>
+                                ))
+                            ) : (
+                                <span className="text-sm text-gray-400">غير مُعين</span>
+                            )}
+                        </div>
                     </div>
 
                     <div>

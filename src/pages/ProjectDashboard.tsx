@@ -150,9 +150,9 @@ export const ProjectDashboard = () => {
         // Apply assignee filter
         if (filterAssignee !== 'all') {
             if (filterAssignee === 'unassigned') {
-                filtered = filtered.filter(task => !task.assignee_id);
+                filtered = filtered.filter(task => !task.assignee_ids || task.assignee_ids.length === 0);
             } else {
-                filtered = filtered.filter(task => task.assignee_id?.toString() === filterAssignee);
+                filtered = filtered.filter(task => task.assignee_ids?.includes(parseInt(filterAssignee)));
             }
         }
 
@@ -259,6 +259,45 @@ export const ProjectDashboard = () => {
                     </button>
                 </div>
             </div>
+
+            {/* Project Progress Bar */}
+            {projectTasks.length > 0 && (
+                <div className="card mb-6">
+                    <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-lg font-semibold">تقدم المشروع</h3>
+                        <span className="text-sm font-medium text-primary">
+                            {(() => {
+                                const completedTasks = projectTasks.filter(task => task.status === 'done').length;
+                                const totalTasks = projectTasks.length;
+                                const percentage = Math.round((completedTasks / totalTasks) * 100);
+                                return `${percentage}%`;
+                            })()}
+                        </span>
+                    </div>
+                    <div className="relative">
+                        <div className="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-primary rounded-full transition-all duration-300"
+                                style={{
+                                    width: `${(() => {
+                                        const completedTasks = projectTasks.filter(task => task.status === 'done').length;
+                                        const totalTasks = projectTasks.length;
+                                        return totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+                                    })()}%`
+                                }}
+                            />
+                        </div>
+                        <div className="flex justify-between mt-2 text-xs text-textSecondary dark:text-textSecondary-dark">
+                            <span>
+                                مكتمل: {projectTasks.filter(task => task.status === 'done').length}
+                            </span>
+                            <span>
+                                من إجمالي: {projectTasks.length} مهمة
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Filters */}
             <div className="card mb-6">
@@ -427,6 +466,7 @@ export const ProjectDashboard = () => {
                 users={users}
                 canLinkTasks={true}
                 onViewTask={setViewingTask}
+                currentUserId={currentUserId}
             />
 
             {/* Task Linking Modal */}

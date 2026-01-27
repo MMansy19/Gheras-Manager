@@ -174,7 +174,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                                                                 <TaskCard
                                                                     task={task}
                                                                     onView={onViewTask ? () => onViewTask(task) : undefined}
-                                                                    onEdit={(onEditTask && (role !== 'volunteer' || task.assignee_id === currentUserId)) ? () => onEditTask(task) : undefined}
+                                                                    onEdit={(onEditTask && (role !== 'volunteer' || task.assignee_ids?.includes(currentUserId!))) ? () => onEditTask(task) : undefined}
                                                                     onDelete={isAdminOrSupervisor && onDeleteTask ? () => onDeleteTask(task) : undefined}
                                                                     users={users}
                                                                     currentUserId={currentUserId}

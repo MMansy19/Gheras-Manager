@@ -290,7 +290,7 @@ let MOCK_TASKS: Task[] = [
     due_date: '2025-12-01',
     project_id: 2,
     team_id: 1,
-    assignee_id: 2,
+    assignee_ids: [2],
     created_by: 1,
     created_at: '2025-11-15T00:00:00Z',
     started_at: null,
@@ -306,7 +306,7 @@ let MOCK_TASKS: Task[] = [
     due_date: '2025-11-28',
     project_id: 4,
     team_id: 5,
-    assignee_id: 3,
+    assignee_ids: [3],
     created_by: 1,
     created_at: '2025-11-18T00:00:00Z',
     started_at: '2025-11-20T10:00:00Z',
@@ -322,7 +322,7 @@ let MOCK_TASKS: Task[] = [
     due_date: '2025-11-22',
     project_id: 2,
     team_id: 2,
-    assignee_id: 4,
+    assignee_ids: [4],
     created_by: 1,
     created_at: '2025-11-19T00:00:00Z',
     started_at: '2025-11-21T09:00:00Z',
@@ -338,7 +338,7 @@ let MOCK_TASKS: Task[] = [
     due_date: '2025-11-24',
     project_id: 1,
     team_id: 3,
-    assignee_id: 6,
+    assignee_ids: [6],
     created_by: 1,
     created_at: '2025-11-22T00:00:00Z',
     started_at: '2025-11-23T11:00:00Z',
@@ -354,7 +354,7 @@ let MOCK_TASKS: Task[] = [
     due_date: '2025-11-30',
     project_id: 4,
     team_id: 4,
-    assignee_id: 5,
+    assignee_ids: [5],
     created_by: 1,
     created_at: '2025-11-20T00:00:00Z',
     started_at: null,
@@ -370,7 +370,7 @@ let MOCK_TASKS: Task[] = [
     due_date: '2025-12-05',
     project_id: 3,
     team_id: 3,
-    assignee_id: 6,
+    assignee_ids: [6],
     created_by: 1,
     created_at: '2025-11-10T00:00:00Z',
     started_at: null,
@@ -386,7 +386,7 @@ let MOCK_TASKS: Task[] = [
     due_date: '2025-12-10',
     project_id: 1,
     team_id: 1,
-    assignee_id: null,
+    assignee_ids: [],
     created_by: 1,
     created_at: '2025-11-25T00:00:00Z',
     started_at: null,
@@ -402,7 +402,7 @@ let MOCK_TASKS: Task[] = [
     due_date: '2025-11-26',
     project_id: 4,
     team_id: 5,
-    assignee_id: 3,
+    assignee_ids: [3],
     created_by: 1,
     created_at: '2025-11-21T00:00:00Z',
     started_at: '2025-11-23T14:00:00Z',
@@ -418,7 +418,7 @@ let MOCK_TASKS: Task[] = [
     due_date: '2025-12-08',
     project_id: 2,
     team_id: 3,
-    assignee_id: 12,
+    assignee_ids: [12],
     created_by: 1,
     created_at: '2025-11-24T00:00:00Z',
     started_at: null,
@@ -434,7 +434,7 @@ let MOCK_TASKS: Task[] = [
     due_date: '2025-12-15',
     project_id: 2,
     team_id: 1,
-    assignee_id: 8,
+    assignee_ids: [8],
     created_by: 1,
     created_at: '2025-11-26T00:00:00Z',
     started_at: null,
@@ -450,7 +450,7 @@ let MOCK_TASKS: Task[] = [
     due_date: '2025-12-20',
     project_id: 4,
     team_id: 5,
-    assignee_id: 9,
+    assignee_ids: [9],
     created_by: 1,
     created_at: '2025-11-18T00:00:00Z',
     started_at: '2025-11-22T08:00:00Z',
@@ -466,7 +466,7 @@ let MOCK_TASKS: Task[] = [
     due_date: '2025-11-29',
     project_id: 2,
     team_id: 2,
-    assignee_id: 15,
+    assignee_ids: [15],
     created_by: 1,
     created_at: '2025-11-23T00:00:00Z',
     started_at: null,
@@ -482,7 +482,7 @@ let MOCK_TASKS: Task[] = [
     due_date: '2025-11-25',
     project_id: 4,
     team_id: 4,
-    assignee_id: 13,
+    assignee_ids: [13],
     created_by: 1,
     created_at: '2025-11-22T00:00:00Z',
     started_at: '2025-11-23T09:00:00Z',
@@ -498,7 +498,7 @@ let MOCK_TASKS: Task[] = [
     due_date: '2025-11-20',
     project_id: 2,
     team_id: 1,
-    assignee_id: 11,
+    assignee_ids: [11],
     created_by: 1,
     created_at: '2025-11-16T00:00:00Z',
     started_at: '2025-11-18T10:00:00Z',
@@ -514,7 +514,7 @@ let MOCK_TASKS: Task[] = [
     due_date: '2025-12-03',
     project_id: 3,
     team_id: 3,
-    assignee_id: 6,
+    assignee_ids: [6],
     created_by: 1,
     created_at: '2025-11-12T00:00:00Z',
     started_at: null,
@@ -530,7 +530,7 @@ let MOCK_TASKS: Task[] = [
     due_date: '2025-12-12',
     project_id: 1,
     team_id: 1,
-    assignee_id: null,
+    assignee_ids: [],
     created_by: 1,
     created_at: '2025-11-27T00:00:00Z',
     started_at: null,
@@ -546,7 +546,7 @@ let MOCK_TASKS: Task[] = [
     due_date: '2025-11-30',
     project_id: 4,
     team_id: 5,
-    assignee_id: 3,
+    assignee_ids: [3],
     created_by: 1,
     created_at: '2025-11-25T00:00:00Z',
     started_at: null,
@@ -562,7 +562,7 @@ let MOCK_TASKS: Task[] = [
     due_date: '2025-11-27',
     project_id: 3,
     team_id: 3,
-    assignee_id: 12,
+    assignee_ids: [12],
     created_by: 1,
     created_at: '2025-11-21T00:00:00Z',
     started_at: '2025-11-23T13:00:00Z',
@@ -674,7 +674,7 @@ export const createTask = async (input: CreateTaskInput & { created_by: number; 
     due_date: input.due_date || null,
     project_id: input.project_id || null,
     team_id: input.team_id,
-    assignee_id: input.assignee_id || null,
+    assignee_ids: input.assignee_ids || [],
     created_by: input.created_by,
     created_at: new Date().toISOString(),
     started_at: null,
@@ -747,16 +747,16 @@ export const fetchStats = async (): Promise<Stats> => {
   
   // Calculate member performance
   const memberStats = new Map<number, { completed: number; hours: number }>();
-  
+
   MOCK_TASKS.forEach(task => {
-    if (task.assignee_id) {
-      const current = memberStats.get(task.assignee_id) || { completed: 0, hours: 0 };
+    task.assignee_ids.forEach(assigneeId => {
+      const current = memberStats.get(assigneeId) || { completed: 0, hours: 0 };
       if (task.status === 'done') {
         current.completed++;
       }
       current.hours += task.work_hours || 0;
-      memberStats.set(task.assignee_id, current);
-    }
+      memberStats.set(assigneeId, current);
+    });
   });
   
   const member_performance = Array.from(memberStats.entries())

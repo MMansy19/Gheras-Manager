@@ -6,13 +6,13 @@ import { useAuth } from '../contexts/AuthContext';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useEffect, useState } from 'react';
-import { AlertTriangle, Moon, Sun, Users, BarChart3, LogOut, User, Menu, X, ChevronLeft, ChevronRight, Calendar } from 'lucide-react';
+import { AlertTriangle, Moon, Sun, Users, BarChart3, LogOut, User, Menu, X, ChevronLeft, ChevronRight, Calendar, UserPlus } from 'lucide-react';
 
 export const AppLayout = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const { role } = useRole();
-    const { logout } = useAuth();
+    const { logout, user } = useAuth();
     const { isDark, toggle } = useDarkMode();
     const [sidebarOpen, setSidebarOpen] = useState(false); // Mobile sidebar state
 
@@ -55,8 +55,9 @@ export const AppLayout = () => {
         return () => clearTimeout(timer);
     }, []); // Empty dependency array - only run once on mount
 
-    const handleLogout = () => {
-        logout();
+    const handleLogout = async () => {
+        await logout();
+        // navigate('/login', { replace: true });
         navigate('/admin/select-role', { replace: true });
     };
 
@@ -135,11 +136,18 @@ export const AppLayout = () => {
                             غراس مدير المهام
                         </h1>
                     </Link>
-                    <p className={`text-sm text-textSecondary dark:text-textSecondary-dark text-center ${sidebarCollapsed ? 'md:hidden' : ''}`}>
-                        {role === 'admin' && 'مدير النظام'}
-                        {role === 'supervisor' && 'مسؤول الفريق'}
-                        {role === 'volunteer' && 'عضو'}
-                    </p>
+                    {user && (
+                        <div className={`text-center ${sidebarCollapsed ? 'md:hidden' : ''}`}>
+                            <p className="text-sm font-medium text-textPrimary dark:text-textPrimary-dark">
+                                {user.name}
+                            </p>
+                            <p className="text-xs text-textSecondary dark:text-textSecondary-dark">
+                                {role === 'admin' && 'مدير النظام'}
+                                {role === 'supervisor' && 'مسؤول الفريق'}
+                                {role === 'volunteer' && 'عضو'}
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Dark Mode Toggle */}
@@ -213,6 +221,25 @@ export const AppLayout = () => {
                                     <span className={`flex-1 ${sidebarCollapsed ? 'md:hidden' : ''
                                         }`}>إدارة المستخدمين</span>
                                 </Link>
+                                {role === 'admin' && (
+                                    <Link
+                                        to="/register"
+                                        className={`
+                                            flex items-center gap-3 px-4 py-3 rounded-md transition-colors text-right
+                                            ${isActiveLink('/register')
+                                                ? 'bg-primary/10 text-primary font-medium'
+                                                : 'text-textPrimary dark:text-textPrimary-dark hover:bg-gray-100 dark:hover:bg-gray-800'
+                                            }
+                                            ${sidebarCollapsed ? 'md:justify-center' : ''}
+                                        `}
+                                        onClick={() => setSidebarOpen(false)}
+                                        title={sidebarCollapsed ? 'إنشاء مستخدم' : ''}
+                                    >
+                                        <UserPlus className="w-5 h-5 flex-shrink-0" />
+                                        <span className={`flex-1 ${sidebarCollapsed ? 'md:hidden' : ''
+                                            }`}>إنشاء مستخدم</span>
+                                    </Link>
+                                )}
                                 <Link
                                     to="/app/stats"
                                     className={`

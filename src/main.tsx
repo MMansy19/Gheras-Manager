@@ -12,6 +12,8 @@ import './index.css';
 // Lazy load pages for better code splitting
 const WelcomePage = lazy(() => import('./pages/WelcomePage').then(module => ({ default: module.WelcomePage })));
 const RoleSelection = lazy(() => import('./pages/RoleSelection').then(module => ({ default: module.RoleSelection })));
+const LoginPage = lazy(() => import('./pages/LoginPage').then(module => ({ default: module.LoginPage })));
+const RegisterPage = lazy(() => import('./pages/RegisterPage').then(module => ({ default: module.RegisterPage })));
 const Home = lazy(() => import('./pages/Home').then(module => ({ default: module.Home })));
 const AppLayout = lazy(() => import('./layouts/AppLayout').then(module => ({ default: module.AppLayout })));
 const ProjectDashboard = lazy(() => import('./pages/ProjectDashboard').then(module => ({ default: module.ProjectDashboard })));
@@ -41,6 +43,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
                         <Suspense fallback={<LoadingSpinner message="جاري التحميل..." />}>
                             <Routes>
                                 <Route path="/" element={<WelcomePage />} />
+                                <Route path="/login" element={<LoginPage />} />
+                                <Route path="/register" element={<RegisterPage />} />
                                 <Route path="/admin/select-role" element={<RoleSelection />} />
                                 <Route path="/app" element={
                                     <ProtectedRoute>

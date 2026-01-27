@@ -91,7 +91,7 @@ export const TaskSchema = z.object({
   due_date: z.string().nullable().optional(),
   project_id: z.number().nullable().optional(),
   team_id: z.number().nullable().optional(),
-  assignee_id: z.number().nullable().optional(),
+  assignee_ids: z.array(z.number()).default([]),
   created_by: z.number(),
   started_at: z.string().nullable().optional(),
   completed_at: z.string().nullable().optional(),
@@ -120,9 +120,9 @@ export const CreateTaskSchema = TaskSchema.pick({
   due_date: true,
   project_id: true,
   team_id: true,
-  assignee_id: true,
+  assignee_ids: true,
   work_hours: true,
-}).partial({ description: true, due_date: true, assignee_id: true, work_hours: true, project_id: true, team_id: true });
+}).partial({ description: true, due_date: true, assignee_ids: true, work_hours: true, project_id: true, team_id: true });
 
 export type CreateTaskInput = z.infer<typeof CreateTaskSchema>;
 

@@ -2,20 +2,17 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
-import { fetchUsers, createUser, updateUser, deleteUser, fetchTeams } from '../api/mockApi';
+import { fetchUsers,  updateUser, deleteUser, fetchTeams } from '../api/mockApi';
 import { User, ROLE_LABELS } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { EmptyState } from '../components/EmptyState';
-import { Modal } from '../components/Modal';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useRole } from '../hooks/useRole';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { AlertTriangle, Plus, Edit2, Search, Users, Trash2 } from 'lucide-react';
+import { AlertTriangle, Plus, Search, Users, Trash2 } from 'lucide-react';
 import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Button } from '../components/ui/button';
 import { 
     Table, 
     TableHeader, 
@@ -36,8 +33,6 @@ export const UsersManagement = () => {
     const [filterTeamId, setFilterTeamId] = useState<number | null>(null);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [itemsPerPage, setItemsPerPage] = useState<number>(10);
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [editingUser, setEditingUser] = useState<User | null>(null);
     const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
     useEffect(() => {
@@ -56,24 +51,11 @@ export const UsersManagement = () => {
         queryFn: fetchTeams,
     });
 
-    const createUserMutation = useMutation({
-        mutationFn: createUser,
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['users'] });
-            setIsCreateModalOpen(false);
-            toast.success('تم إنشاء المستخدم بنجاح');
-        },
-        onError: () => {
-            toast.error('فشل إنشاء المستخدم');
-        },
-    });
-
     const updateUserMutation = useMutation({
         mutationFn: ({ id, data }: { id: number; data: Partial<User> }) =>
             updateUser(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['users'] });
-            setEditingUser(null);
             toast.success('تم تحديث المستخدم بنجاح');
         },
         onError: () => {
@@ -144,8 +126,10 @@ export const UsersManagement = () => {
             {/* Header */}
             <div className="mb-6 flex flex-col sm:flex-row-reverse items-start sm:items-center justify-between gap-4">
                 <button
-                    onClick={() => setIsCreateModalOpen(true)}
+                    onClick={() => navigate('/register')}
                     className="btn-primary flex items-center gap-2"
+                    disabled={role !== 'admin'}
+                    title={role !== 'admin' ? 'فقط المديرين يمكنهم إنشاء مستخدمين' : 'إنشاء مستخدم جديد'}
                 >
                     <Plus className="w-5 h-5" />
                     إضافة مستخدم
@@ -243,13 +227,6 @@ export const UsersManagement = () => {
                                 <TableCell>
                                     <TableActions>
                                         <button
-                                            onClick={() => setEditingUser(user)}
-                                            className="text-sm btn-secondary py-1 px-2 flex items-center gap-1"
-                                        >
-                                            <Edit2 className="w-3 h-3" />
-                                            تعديل
-                                        </button>
-                                        <button
                                             onClick={() => setUserToDelete(user)}
                                             className="text-sm bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-700 dark:text-red-400 py-1 px-2 rounded-md flex items-center gap-1 transition-colors"
                                         >
@@ -279,24 +256,6 @@ export const UsersManagement = () => {
                 />
             )}
 
-            {/* Create/Edit User Modal */}
-            <UserFormModal
-                isOpen={isCreateModalOpen || !!editingUser}
-                onClose={() => {
-                    setIsCreateModalOpen(false);
-                    setEditingUser(null);
-                }}
-                user={editingUser}
-                teams={teams}
-                onSubmit={(data) => {
-                    if (editingUser) {
-                        updateUserMutation.mutate({ id: editingUser.id, data });
-                    } else {
-                        createUserMutation.mutate(data);
-                    }
-                }}
-            />
-
             {/* Delete Confirmation Dialog */}
             <ConfirmDialog
                 isOpen={!!userToDelete}
@@ -312,327 +271,5 @@ export const UsersManagement = () => {
                 cancelText="إلغاء"
             />
         </div>
-    );
-};
-
-// UserFormModal Component
-interface UserFormModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    user: User | null;
-    teams?: any[];
-    onSubmit: (data: any) => void;
-}
-
-const UserFormModal: React.FC<UserFormModalProps> = ({
-    isOpen,
-    onClose,
-    user,
-    teams,
-    onSubmit,
-}) => {
-    const [formData, setFormData] = useState<{
-        name: string;
-        email: string;
-        password: string;
-        password_confirmation: string;
-        role: 'admin' | 'supervisor' | 'volunteer';
-        status: boolean;
-        telegram_id: string;
-        job_field: string;
-        age: number;
-        country: string;
-        experience_years: number;
-        weekly_hours: number;
-        teams: number[];
-    }>({
-        name: '',
-        email: '',
-        password: '',
-        password_confirmation: '',
-        role: 'volunteer',
-        status: true,
-        telegram_id: '',
-        job_field: '',
-        age: 0,
-        country: '',
-        experience_years: 0,
-        weekly_hours: 0,
-        teams: [],
-    });
-
-    // Update form data when user prop changes
-    useEffect(() => {
-        if (user) {
-            setFormData({
-                name: user.name || '',
-                email: user.email || '',
-                password: '',
-                password_confirmation: '',
-                role: user.role || 'volunteer',
-                status: user.status ?? true,
-                telegram_id: user.telegram_id || '',
-                job_field: user.job_field || '',
-                age: user.age || 0,
-                country: user.country || '',
-                experience_years: user.experience_years || 0,
-                weekly_hours: user.weekly_hours || 0,
-                teams: user.teams || [],
-            });
-        } else {
-            setFormData({
-                name: '',
-                email: '',
-                password: '',
-                password_confirmation: '',
-                role: 'volunteer',
-                status: true,
-                telegram_id: '',
-                job_field: '',
-                age: 0,
-                country: '',
-                experience_years: 0,
-                weekly_hours: 0,
-                teams: [],
-            });
-        }
-    }, [user, isOpen]);
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (!user && formData.password !== formData.password_confirmation) {
-            toast.error('كلمتا المرور غير متطابقتين');
-            return;
-        }
-
-        if (!user && formData.password.length < 6) {
-            toast.error('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
-            return;
-        }
-
-        onSubmit(formData);
-    };
-
-    const handleTeamsChange = (teamId: number) => {
-        if (formData.teams.includes(teamId)) {
-            setFormData({
-                ...formData,
-                teams: formData.teams.filter((id) => id !== teamId),
-            });
-        } else {
-            setFormData({
-                ...formData,
-                teams: [...formData.teams, teamId],
-            });
-        }
-    };
-
-    return (
-        <Modal
-            isOpen={isOpen}
-            onClose={onClose}
-            title={user ? 'تعديل المستخدم' : 'إضافة مستخدم جديد'}
-            size="lg"
-        >
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="name">الاسم الكامل *</Label>
-                        <Input
-                            id="name"
-                            type="text"
-                            value={formData.name}
-                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                            required
-                            placeholder="أدخل الاسم الكامل"
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="email">البريد الإلكتروني *</Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            value={formData.email}
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            required
-                            placeholder="user@example.com"
-                        />
-                    </div>
-                </div>
-
-                {!user && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="password">كلمة المرور *</Label>
-                            <Input
-                                id="password"
-                                type="password"
-                                value={formData.password}
-                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                required
-                                placeholder="******"
-                                minLength={6}
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <Label htmlFor="password_confirmation">تأكيد كلمة المرور *</Label>
-                            <Input
-                                id="password_confirmation"
-                                type="password"
-                                value={formData.password_confirmation}
-                                onChange={(e) =>
-                                    setFormData({ ...formData, password_confirmation: e.target.value })
-                                }
-                                required
-                                placeholder="******"
-                                minLength={6}
-                            />
-                        </div>
-                    </div>
-                )}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="role">الدور</Label>
-                        <Select
-                            value={formData.role}
-                            onValueChange={(value) => setFormData({ ...formData, role: value as any })}
-                        >
-                            <SelectTrigger>
-                                <SelectValue placeholder="اختر الدور" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {Object.entries(ROLE_LABELS).map(([value, label]) => (
-                                    <SelectItem key={value} value={value}>
-                                        {label}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-
-                    <div>
-                        <label htmlFor="status">الحالة</label>
-                        <div className="flex items-center gap-2 mt-2">
-                            <input
-                                id="status"
-                                type="checkbox"
-                                checked={formData.status}
-                                onChange={(e) => setFormData({ ...formData, status: e.target.checked })}
-                            />
-                            <label htmlFor="status" className="mb-0">
-                                {formData.status ? 'نشط' : 'معطل'}
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="telegram_id">معرف تلجرام</Label>
-                        <Input
-                            id="telegram_id"
-                            type="text"
-                            value={formData.telegram_id || ''}
-                            onChange={(e) => setFormData({ ...formData, telegram_id: e.target.value })}
-                            placeholder="@username"
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="job_field">مجال العمل</Label>
-                        <Input
-                            id="job_field"
-                            type="text"
-                            value={formData.job_field || ''}
-                            onChange={(e) => setFormData({ ...formData, job_field: e.target.value })}
-                            placeholder="مثال: مطور ويب"
-                        />
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="age">العمر</Label>
-                        <Input
-                            id="age"
-                            type="number"
-                            value={formData.age || 0}
-                            onChange={(e) =>
-                                setFormData({ ...formData, age: parseInt(e.target.value) || 0 })
-                            }
-                            placeholder="0"
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="country">الدولة</Label>
-                        <Input
-                            id="country"
-                            type="text"
-                            value={formData.country || ''}
-                            onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                            placeholder="مصر"
-                        />
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label htmlFor="experience_years">سنوات الخبرة</Label>
-                        <Input
-                            id="experience_years"
-                            type="number"
-                            value={formData.experience_years || 0}
-                            onChange={(e) =>
-                                setFormData({ ...formData, experience_years: parseInt(e.target.value) || 0 })
-                            }
-                            placeholder="0"
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="weekly_hours">ساعات التفرغ الأسبوعية</Label>
-                        <Input
-                            id="weekly_hours"
-                            type="number"
-                            value={formData.weekly_hours || 0}
-                            onChange={(e) =>
-                                setFormData({ ...formData, weekly_hours: parseInt(e.target.value) || 0 })
-                            }
-                            placeholder="0"
-                        />
-                    </div>
-                </div>
-
-                <div className="space-y-2">
-                    <Label>الفرق</Label>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                        {teams?.map((team) => (
-                            <label key={team.id} className="flex items-center gap-2 cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    checked={formData.teams.includes(team.id)}
-                                    onChange={() => handleTeamsChange(team.id)}
-                                />
-                                <span className="text-sm">{team.name}</span>
-                            </label>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="flex gap-2 justify-start pt-4">
-                    <Button type="button" variant="outline" onClick={onClose}>
-                        إلغاء
-                    </Button>
-                    <Button type="submit">
-                        {user ? 'حفظ التعديلات' : 'إنشاء المستخدم'}
-                    </Button>
-                </div>
-            </form>
-        </Modal>
     );
 };

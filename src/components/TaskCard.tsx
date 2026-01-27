@@ -24,8 +24,6 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete, onVi
         return user?.name || 'غير معروف';
     };
 
-    const isCurrentUser = task.assignee_id === currentUserId;
-
     return (
         <div className="space-y-2">
             <div className="flex items-start justify-between gap-2">
@@ -90,29 +88,37 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete, onVi
                     </div>
                 )}
 
-                {task.assignee_id && (
-                    isCurrentUser ? (
-                        <div className="flex items-center gap-1.5 px-2 py-1 bg-primary/10 rounded-full border border-primary/30">
-                            <div className="w-5 h-5 rounded-full bg-primary/30 flex items-center justify-center text-primary">
-                                <UserIcon className="w-3 h-3" />
-                            </div>
-                            <span className="text-xs font-semibold text-primary">
-                                {getUserName(task.assignee_id)}
-                            </span>
-                            <span className="text-[10px] text-primary/70 font-medium">
-                                (أنت)
-                            </span>
-                        </div>
-                    ) : (
-                        <div className="flex items-center gap-1.5">
-                            <div className="w-5 h-5 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 text-[10px] font-bold">
-                                {getUserName(task.assignee_id)?.charAt(0)}
-                            </div>
-                            <span className="text-xs text-textSecondary dark:text-textSecondary-dark">
-                                {getUserName(task.assignee_id)}
-                            </span>
-                        </div>
-                    )
+                {task.assignee_ids && task.assignee_ids.length > 0 && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                        {task.assignee_ids.map((assigneeId) => {
+                            const isAssigneeCurrentUser = assigneeId === currentUserId;
+                            const userName = getUserName(assigneeId);
+                            if (!userName) return null;
+
+                            return isAssigneeCurrentUser ? (
+                                <div key={assigneeId} className="flex items-center gap-1.5 px-2 py-1 bg-primary/10 rounded-full border border-primary/30">
+                                    <div className="w-5 h-5 rounded-full bg-primary/30 flex items-center justify-center text-primary">
+                                        <UserIcon className="w-3 h-3" />
+                                    </div>
+                                    <span className="text-xs font-semibold text-primary">
+                                        {userName}
+                                    </span>
+                                    <span className="text-[10px] text-primary/70 font-medium">
+                                        (أنت)
+                                    </span>
+                                </div>
+                            ) : (
+                                <div key={assigneeId} className="flex items-center gap-1.5">
+                                    <div className="w-5 h-5 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 text-[10px] font-bold">
+                                        {userName.charAt(0)}
+                                    </div>
+                                    <span className="text-xs text-textSecondary dark:text-textSecondary-dark">
+                                        {userName}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
                 )}
             </div>
         </div>

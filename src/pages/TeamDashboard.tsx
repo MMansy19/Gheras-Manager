@@ -122,9 +122,9 @@ export const TeamDashboard = () => {
         // Apply assignee filter
         if (filterAssignee !== 'all') {
             if (filterAssignee === 'unassigned') {
-                filteredTasks = filteredTasks.filter(task => !task.assignee_id);
+                filteredTasks = filteredTasks.filter(task => !task.assignee_ids || task.assignee_ids.length === 0);
             } else {
-                filteredTasks = filteredTasks.filter(task => task.assignee_id?.toString() === filterAssignee);
+                filteredTasks = filteredTasks.filter(task => task.assignee_ids?.includes(parseInt(filterAssignee)));
             }
         }
 

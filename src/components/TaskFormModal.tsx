@@ -4,9 +4,9 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { SearchableSelect, SearchableSelectContent, SearchableSelectItem, SearchableSelectTrigger, SearchableSelectValue } from './ui/searchable-select';
 import { DatePicker } from './ui/date-picker';
 import { Button } from './ui/button';
+import { Checkbox } from './ui/checkbox';
 import { Task, TaskPriority, TaskStatus, PRIORITY_CONFIG, STATUS_LABELS } from '../types';
 import { PriorityBadge } from './PriorityBadge';
 
@@ -34,7 +34,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
     const currentUserId = role === 'volunteer' ? 3 : null;
 
     // Check if volunteer is editing their own task (can only update status and work_hours)
-    const isVolunteerEditing = role === 'volunteer' && task !== null && task.assignee_id === currentUserId;
+    const isVolunteerEditing = role === 'volunteer' && task !== null && task.assignee_ids?.includes(currentUserId!);
 
     const [formData, setFormData] = useState({
         title: '',
@@ -42,7 +42,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
         status: 'new' as TaskStatus,
         priority: 'normal' as TaskPriority,
         due_date: '',
-        assignee_id: '' as string | number,
+        assignee_ids: [] as number[],
         work_hours: 0,
     });
 
@@ -57,7 +57,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 status: task.status || 'new',
                 priority: task.priority || 'normal',
                 due_date: task.due_date || '',
-                assignee_id: task.assignee_id || 'unassigned',
+                assignee_ids: task.assignee_ids || [],
                 work_hours: task.work_hours || 0,
             });
         } else {
@@ -68,7 +68,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                 status: 'new',
                 priority: 'normal',
                 due_date: '',
-                assignee_id: role === 'volunteer' && currentUserId ? currentUserId : 'unassigned',
+                assignee_ids: role === 'volunteer' && currentUserId ? [currentUserId] : [],
                 work_hours: 0,
             });
         }
@@ -86,7 +86,7 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
         } else {
             onSubmit({
                 ...formData,
-                assignee_id: formData.assignee_id && formData.assignee_id !== 'unassigned' ? parseInt(formData.assignee_id as any) : null,
+                assignee_ids: formData.assignee_ids,
             });
         }
         onClose();
@@ -201,97 +201,121 @@ export const TaskFormModal: React.FC<TaskFormModalProps> = ({
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label htmlFor="assignee_ids">تعيين إلى</Label>
+
                     {role === 'volunteer' && !task ? (
                         <div className="space-y-2">
-                            <Label htmlFor="assignee_id">تعيين إلى</Label>
-                            <Select
-                                value={formData.assignee_id?.toString() || ''}
-                                disabled
-                            >
-                                <SelectTrigger className="bg-gray-100 dark:bg-gray-700 cursor-not-allowed">
-                                    <SelectValue>
+                            <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg border">
+                                <div className="flex items-center gap-2">
+                                    <Checkbox
+                                        checked={true}
+                                        disabled
+                                    />
+                                    <span className="font-medium">
                                         {users?.find(u => u.id === currentUserId)?.name} (أنت)
-                                    </SelectValue>
-                                </SelectTrigger>
-                            </Select>
+                                    </span>
+                                </div>
+                            </div>
                             <p className="text-xs text-primary mt-1">
                                 الأعضاء يمكنهم إنشاء مهام لأنفسهم فقط
                             </p>
                         </div>
                     ) : role === 'volunteer' && task ? (
                         <div className="space-y-2">
-                            <Label htmlFor="assignee_id">تعيين إلى</Label>
-                            <Select
-                                value={formData.assignee_id?.toString() || 'unassigned'}
-                                disabled
-                            >
-                                <SelectTrigger className="bg-gray-100 dark:bg-gray-700 cursor-not-allowed">
-                                    <SelectValue placeholder="اختر المستخدم" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="unassigned">غير معيّن</SelectItem>
-                                    {users?.filter(u => u.status && u).map((user) => (
-                                        <SelectItem key={user.id} value={user.id.toString()}>
-                                            {user.name} ({user.telegram_id})
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-lg border">
+                                <div className="flex items-center gap-2">
+                                    <Checkbox
+                                        checked={formData.assignee_ids?.includes(currentUserId!) || false}
+                                        disabled
+                                    />
+                                    <span className="font-medium">
+                                        {users?.find(u => u.id === currentUserId)?.name} (أنت)
+                                    </span>
+                                </div>
+                            </div>
+                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                                يمكنك فقط عرض المهام المعينة لك
+                            </p>
                         </div>
                     ) : (
-                        <div className="space-y-2">
-                            <Label htmlFor="assignee_id">تعيين إلى</Label>
-                            <SearchableSelect
-                                value={formData.assignee_id?.toString() || 'unassigned'}
-                                onValueChange={(value) => setFormData({ ...formData, assignee_id: value })}
-                            >
-                                <SearchableSelectTrigger>
-                                    <SearchableSelectValue placeholder="اختر المستخدم" />
-                                </SearchableSelectTrigger>
-                                <SearchableSelectContent
-                                    onSearchChange={setUserSearch}
-                                    searchPlaceholder="ابحث عن مستخدم..."
-                                >
-                                    <SearchableSelectItem value="unassigned">غير معيّن</SearchableSelectItem>
-                                    {users
-                                        ?.filter(u => u.status && u)
-                                        .filter(user =>
-                                            userSearch === '' ||
-                                            user.name.toLowerCase().includes(userSearch.toLowerCase()) ||
-                                            user.telegram_id?.toLowerCase().includes(userSearch.toLowerCase())
-                                        )
-                                        .map((user) => (
-                                            <SearchableSelectItem key={user.id} value={user.id.toString()}>
+                        <div className="space-y-3">
+                            <div className="relative">
+                                <Input
+                                    type="text"
+                                    placeholder="ابحث عن مستخدم..."
+                                    value={userSearch}
+                                    onChange={(e) => setUserSearch(e.target.value)}
+                                    className="mb-3"
+                                />
+                            </div>
+                            <div className="max-h-48 overflow-y-auto border rounded-lg p-3 space-y-2">
+                                {users
+                                    ?.filter(u => u.status && u)
+                                    .filter(user =>
+                                        userSearch === '' ||
+                                        user.name.toLowerCase().includes(userSearch.toLowerCase()) ||
+                                        user.telegram_id?.toLowerCase().includes(userSearch.toLowerCase())
+                                    )
+                                    .map((user) => (
+                                        <div key={user.id} className="flex items-center gap-2">
+                                            <Checkbox
+                                                checked={formData.assignee_ids.includes(user.id)}
+                                                onCheckedChange={(checked) => {
+                                                    if (checked) {
+                                                        setFormData({
+                                                            ...formData,
+                                                            assignee_ids: [...formData.assignee_ids, user.id]
+                                                        });
+                                                    } else {
+                                                        setFormData({
+                                                            ...formData,
+                                                            assignee_ids: formData.assignee_ids.filter(id => id !== user.id)
+                                                        });
+                                                    }
+                                                }}
+                                            />
+                                            <span className="text-sm">
                                                 {user.name} ({user.telegram_id})
-                                            </SearchableSelectItem>
-                                        ))}
-                                </SearchableSelectContent>
-                            </SearchableSelect>
-                        </div>
-                    )}
-
-                    {/* Only show work_hours field when editing existing task */}
-                    {task && (
-                        <div className="space-y-2">
-                            <Label htmlFor="work_hours">ساعات العمل</Label>
-                            <Input
-                                id="work_hours"
-                                type="number"
-                                step="0.5"
-                                value={formData.work_hours}
-                                onChange={(e) => setFormData({ ...formData, work_hours: parseFloat(e.target.value) })}
-                                disabled={role === 'volunteer' && !isVolunteerEditing}
-                                className={role === 'volunteer' && !isVolunteerEditing ? "bg-gray-100 dark:bg-gray-700 cursor-not-allowed" : ""}
-                            />
-                            {isVolunteerEditing && (
-                                <p className="text-xs text-primary mt-1">
-                                    يمكنك تحديث حالة المهمة وساعات العمل
-                                </p>
+                                            </span>
+                                        </div>
+                                    ))}
+                            </div>
+                            {formData.assignee_ids.length > 0 && (
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setFormData({ ...formData, assignee_ids: [] })}
+                                    className="text-xs"
+                                >
+                                    مسح الاختيار
+                                </Button>
                             )}
                         </div>
                     )}
                 </div>
+
+                {/* Only show work_hours field when editing existing task */}
+                {task && (
+                    <div className="space-y-2">
+                        <Label htmlFor="work_hours">ساعات العمل</Label>
+                        <Input
+                            id="work_hours"
+                            type="number"
+                            step="0.5"
+                            value={formData.work_hours}
+                            onChange={(e) => setFormData({ ...formData, work_hours: parseFloat(e.target.value) })}
+                            disabled={role === 'volunteer' && !isVolunteerEditing}
+                            className={role === 'volunteer' && !isVolunteerEditing ? "bg-gray-100 dark:bg-gray-700 cursor-not-allowed" : ""}
+                        />
+                        {isVolunteerEditing && (
+                            <p className="text-xs text-primary mt-1">
+                                يمكنك تحديث حالة المهمة وساعات العمل
+                            </p>
+                        )}
+                    </div>
+                )}
 
                 <div className="flex gap-2 justify-start pt-4">
                     <Button type="button" variant="outline" onClick={onClose}>
