@@ -221,7 +221,7 @@ export const AppLayout = () => {
                                     <span className={`flex-1 ${sidebarCollapsed ? 'md:hidden' : ''
                                         }`}>إدارة المستخدمين</span>
                                 </Link>
-                                {role === 'admin' && (
+                                {/* {role === 'admin' && ( */}
                                     <Link
                                         to="/register"
                                         className={`
@@ -239,7 +239,7 @@ export const AppLayout = () => {
                                         <span className={`flex-1 ${sidebarCollapsed ? 'md:hidden' : ''
                                             }`}>إنشاء مستخدم</span>
                                     </Link>
-                                )}
+                                {/* )} */}
                                 <Link
                                     to="/app/stats"
                                     className={`
